@@ -15,9 +15,9 @@ chapters = all_data["chapters"]
 
 # ----- Логика ------
 def refresh_list():
-    listbox.delete(0, tk.END)
+    listbox_characters.delete(0, tk.END)
     for ch in characters:
-        listbox.insert(tk.END, ch["name"])
+        listbox_characters.insert(tk.END, ch["name"])
 
 def add_character():
     name = entry_name.get().strip()
@@ -38,7 +38,7 @@ def add_character():
     save_all()
 
 def del_character():
-    selected = listbox.curselection()
+    selected = listbox_characters.curselection()
     if not selected:
         return
     del characters[selected[0]]
@@ -50,18 +50,18 @@ def del_character():
     save_all()
 
 def del_all():
-    listbox.delete(0, tk.END)
+    listbox_characters.delete(0, tk.END)
     refresh_list()
     save_all()
 
 def on_double_click(event):
-    index = listbox.nearest(event.y)
-    listbox.delete(index)
+    index = listbox_characters.nearest(event.y)
+    listbox_characters.delete(index)
     refresh_list()
     save_all()
 
 def on_select(event):
-    selected = listbox.curselection()
+    selected = listbox_characters.curselection()
     if not selected:
         return
     ch = characters[selected[0]]
@@ -170,24 +170,24 @@ content.pack(side="left", fill="both", expand=True)
 characters_frame = tk.Frame(content)
 characters_frame.pack(fill="both", expand=True)
 
-listbox = tk.Listbox(characters_frame, width=30)
-listbox.pack(side="left", fill="both", expand=True)
-listbox.bind("<<ListboxSelect>>", on_select)
+listbox_characters = tk.Listbox(characters_frame, width=30)
+listbox_characters.pack(side="left", fill="y")
+listbox_characters.bind("<<ListboxSelect>>", on_select)
 
 panel = tk.Frame(characters_frame)
-panel.pack(side="right", fill="y", padx=10, pady=10)
+panel.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
 tk.Label(panel, text="Имя").pack(anchor="w", pady=(10, 0))
 entry_name = tk.Entry(panel, width=30)
-entry_name.pack()
+entry_name.pack(fill="x")
 
 tk.Label(panel, text="Характер").pack(anchor="w", pady=(10, 0))
 entry_character = tk.Entry(panel, width=30)
-entry_character.pack()
+entry_character.pack(fill="x")
 
 tk.Label(panel, text="Внешность").pack(anchor="w", pady=(10, 0))
 entry_appearance = tk.Entry(panel, width=30)
-entry_appearance.pack()
+entry_appearance.pack(fill="x")
 
 add_button = tk.Button(panel, text = "Добавить", command=add_character)
 add_button.pack()
@@ -198,7 +198,7 @@ del_button.pack()
 del_all_button = tk.Button(panel, text= "Удалить все", command= del_all)
 del_all_button.pack()
 
-listbox.bind("<Double-Button-1>", on_double_click)
+listbox_characters.bind("<Double-Button-1>", on_double_click)
 
 #----------Главы----------
 
