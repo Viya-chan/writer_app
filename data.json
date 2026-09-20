@@ -1,9 +1,10 @@
 {
-  "characters": [
+  "characters": [],
+  "chapters": [
     {
-      "name": "Асуна",
-      "character": "Боевая",
-      "appearance": "Светлые волосы"
+      "title": "Глава 1",
+      "status": "Черновик",
+      "text": "Какой-то текст"
     }
   ]
 }
