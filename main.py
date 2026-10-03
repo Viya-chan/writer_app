@@ -1,5 +1,8 @@
-
 import tkinter as tk
+import customtkinter as ctk
+
+ctk.set_appearance_mode("System")
+ctk.set_default_color_theme("blue")
 import json
 import os
 import data
@@ -126,109 +129,121 @@ def on_select_chapter(event):
     text_chapter.insert("1.0", ch["text"])
 
 
-
-
-
 def show_caracters ():
-    chapters_frame.pack_forget()
+    #chapters_frame.pack_forget()
     characters_frame.pack(fill="both", expand=True)
 
 def show_chapters():
     characters_frame.pack_forget()
-    chapters_frame.pack(fill="both", expand=True)
+    #chapters_frame.pack(fill="both", expand=True)
 
 def save_all():
     data.save_data(all_data)    
 
 # ------ Интерфейс ------ 
 # ------Главное окно --------       
-root = tk.Tk()
+root = ctk.CTk()
 root.title("Моя программа")
 root.geometry("700x500")
+root.grid_columnconfigure(0, weight=0) #первый столбик не рстягивается
+root.grid_columnconfigure(1, weight=1) #второй столбик рястягивается
+root.grid_rowconfigure(0, weight=1) #строка растягивается
 
 #-------Боковое меню ---------
 
-sidebar = tk.Frame(root, width=150, bg = "lightgray")
-sidebar.pack(side="left", fill="y")
+sidebar = ctk.CTkFrame(root, width=150, corner_radius=0)
+sidebar.grid(row = 0, column = 0, sticky = "ns")
+sidebar.grid_propagate(False)
+sidebar.configure(width = 150)
 
-btn1 = tk.Button(sidebar, text="Персонажи", command=show_caracters)
-btn1.pack(padx=5, pady=5, fill="x")
+btn1 = ctk.CTkButton(sidebar, text="Персонажи", command=show_caracters)
+btn1.grid(row = 0, column = 0)
 
-btn2 = tk.Button(sidebar, text="Главы", command=show_chapters)
-btn2.pack(padx=5, pady=5, fill= "x")
+btn2 = ctk.CTkButton(sidebar, text="Главы", command=show_chapters)
+btn2.grid(row = 1, column = 0)
 
-btn3 = tk.Button(sidebar, text="Сюжет")
-btn3.pack(padx=5, pady=5, fill="x")
+btn3 = ctk.CTkButton(sidebar, text="Сюжет")
+btn3.grid(row = 2, column = 0)
 
 #---------Средняя часть --------
 
-content = tk.Frame(root)
-content.pack(side="left", fill="both", expand=True)
+content = ctk.CTkFrame(root, fg_color="transparent")
+content.grid_columnconfigure(0, weight=1)
+content.grid_rowconfigure(0, weight=1)
+content.grid(row = 0, column = 1, sticky = "nsew")
 
 #--------Персонажи----------------
 
-characters_frame = tk.Frame(content)
-characters_frame.pack(fill="both", expand=True)
+characters_frame = ctk.CTkFrame(content)
+characters_frame.grid(row = 0, column = 0, sticky = "nsew")
+characters_frame.grid_columnconfigure(0, weight=0)
+characters_frame.grid_columnconfigure(1, weight=1)
+characters_frame.grid_rowconfigure(0, weight=1)
 
 listbox_characters = tk.Listbox(characters_frame, width=30)
-listbox_characters.pack(side="left", fill="y")
+listbox_characters.grid(row = 0, column= 0, rowspan = 8, sticky="nsew")
 listbox_characters.bind("<<ListboxSelect>>", on_select)
 
-panel = tk.Frame(characters_frame)
-panel.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+panel = ctk.CTkFrame(characters_frame)
+panel.grid_columnconfigure(0, weight=1)     
+panel.grid(row = 0, column = 1, sticky = "nsew")
 
-tk.Label(panel, text="Имя").pack(anchor="w", pady=(10, 0))
-entry_name = tk.Entry(panel, width=30)
-entry_name.pack(fill="x")
+ctk.CTkLabel(panel, text="Имя").grid(row = 0, column = 0, pady=(10, 0))
+entry_name = ctk.CTkEntry(panel, width=30)
+entry_name.grid(row = 1, column = 0, sticky = "ew", padx = 10)
 
-tk.Label(panel, text="Характер").pack(anchor="w", pady=(10, 0))
-entry_character = tk.Entry(panel, width=30)
-entry_character.pack(fill="x")
+ctk.CTkLabel(panel, text="Характер").grid(row = 2, column = 0, pady=(10, 0))
+entry_character = ctk.CTkEntry(panel, width=30)
+entry_character.grid(row = 3, column = 0, sticky = "ew", padx = 10)
 
-tk.Label(panel, text="Внешность").pack(anchor="w", pady=(10, 0))
-entry_appearance = tk.Entry(panel, width=30)
-entry_appearance.pack(fill="x")
+ctk.CTkLabel(panel, text="Внешность").grid(row = 4, column = 0, pady=(10, 0))
+entry_appearance = ctk.CTkEntry(panel, width=30)
+entry_appearance.grid(row = 5, column = 0, sticky = "ew", padx = 10)
 
-add_button = tk.Button(panel, text = "Добавить", command=add_character)
-add_button.pack()
+add_button = ctk.CTkButton(panel, text = "Добавить", command=add_character)
+add_button.grid(row = 6, column = 0, sticky = "ew", padx = 10, pady = 5)
 
-del_button = tk.Button(panel, text= "Удалить", command=del_character)
-del_button.pack()
+del_button = ctk.CTkButton(panel, text= "Удалить", command=del_character)
+del_button.grid(row = 7, column = 0, sticky = "ew", padx = 10, pady = 5)
 
-del_all_button = tk.Button(panel, text= "Удалить все", command= del_all)
-del_all_button.pack()
+del_all_button = ctk.CTkButton(panel, text= "Удалить все", command= del_all)
+del_all_button.grid(row = 8, column = 0, sticky = "ew", padx = 10, pady = 5)
 
 listbox_characters.bind("<Double-Button-1>", on_double_click)
 
 #----------Главы----------
 
-chapters_frame = tk.Frame(content)
-chapters_frame.pack(fill="both", expand=True)
+
+chapters_frame = ctk.CTkFrame(content)
+chapters_frame.grid(row = 0, column = 0)
+chapters_frame.grid_columnconfigure(0, weight= 0)
+chapters_frame.grid_columnconfigure( 1, weight= 1)
+chapters_frame.grid_rowconfigure(0, weight=1)
 
 # Список глав слева
 listbox_chapters = tk.Listbox(chapters_frame, width=30)
-listbox_chapters.pack(side="left", fill="y")
+listbox_chapters.grid(row = 0, column= 0, sticky="nsew", rowspan= )
 listbox_chapters.bind("<<ListboxSelect>>", on_select_chapter)
 
 # Панель справа
-panel_chapters = tk.Frame(chapters_frame)
-panel_chapters.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+panel_chapters = ctk.CTkFrame(chapters_frame)
+panel_chapters.grid(row = 0, column = 1, sticky = "nsew", padx=10, pady=10)
 
 # Верхняя строка(название + статус)
-top_row = tk.Frame(panel_chapters)
-top_row.pack(fill="x")
+top_row = ctk.CTkFrame(panel_chapters)
+top_row.grid(row = 0, column = 0, sticky = "ew")
 
 # Название 
-title_block = tk.Frame(top_row)
+title_block = ctk.CTkFrame(top_row)
 title_block.pack(side="left", padx=(0, 10))
-tk.Label(title_block, text="Название").pack(anchor="w")
-entry_chapter_title = tk.Entry(title_block, width=30)
+ctk.CTkLabel(title_block, text="Название").pack(anchor="w")
+entry_chapter_title = ctk.CTkEntry(title_block, width=300)
 entry_chapter_title.pack()
 
 # Статус 
-status_blok = tk.Frame(top_row)
+status_blok = ctk.CTkFrame(top_row)
 status_blok.pack(side="left")
-tk.Label(status_blok, text="Статус").pack(anchor="w")
+ctk.CTkLabel(status_blok, text="Статус").pack(anchor="w")
 status_var = tk.StringVar(value="Черновик")
 status_menu = tk.OptionMenu(
     status_blok, status_var,
@@ -237,18 +252,18 @@ status_menu = tk.OptionMenu(
 status_menu.pack()
 
 # Главы
-tk.Label(panel_chapters, text="Главы").pack(anchor="w", pady=(0, 10))
-text_chapter = tk.Text(panel_chapters, height=15, width=50)
+ctk.CTkLabel(panel_chapters, text="Главы").pack(anchor="w", pady=(0, 10))
+text_chapter = ctk.CTkTextbox(panel_chapters, height=15, width=50)
 text_chapter.pack(fill="both", expand=True)
 
 # Кнопки 
-buttons_row = tk.Frame(panel_chapters)
+buttons_row = ctk.CTkFrame(panel_chapters)
 buttons_row.pack(fill="x", pady=(10, 0))
 
-add_chapter_btn = tk.Button(buttons_row, text="Добавить главу", command=add_chapters)
+add_chapter_btn = ctk.CTkButton(buttons_row, text="Добавить главу", command=add_chapters)
 add_chapter_btn.pack(side="left")
 
-dell_chapter_btn = tk.Button(buttons_row, text="Удалить главу", command=del_chapter)
+dell_chapter_btn = ctk.CTkButton(buttons_row, text="Удалить главу", command=del_chapter)
 dell_chapter_btn.pack(side="left")
 
 chapters_frame.pack_forget()
@@ -256,8 +271,6 @@ chapters_frame.pack_forget()
 
 
 
-
-
 refresh_list()
-refresh_chapters()
+#refresh_chapters()
 root.mainloop()
