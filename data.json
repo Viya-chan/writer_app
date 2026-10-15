@@ -1,10 +1,14 @@
 {
-  "characters": [],
-  "chapters": [
+  "characters": [
     {
-      "title": "Глава 1",
-      "status": "Черновик",
-      "text": "Какой-то текст"
+      "name": "орпмор",
+      "character": "тлодтдл",
+      "appearance": ""
     }
-  ]
+  ],
+  "chapters": [],
+  "plot": {
+    "idea": "Напишем здесь что-то, чтобы проверить\nПроверяем автосохранение",
+    "parts": []
+  }
 }

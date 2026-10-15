@@ -12,8 +12,12 @@ if "characters" not in all_data:
     all_data["characters"] = []
 if "chapters" not in all_data:
     all_data["chapters"] = []
+if "plot" not in all_data:
+    all_data["plot"] = {"idea":"", "parts":[]}
 characters = all_data["characters"]
 chapters = all_data["chapters"]
+plot = all_data["plot"]
+parts = plot["parts"]
 
 
 # ----- Логика ------
@@ -128,14 +132,77 @@ def on_select_chapter(event):
     text_chapter.delete("1.0", tk.END)
     text_chapter.insert("1.0", ch["text"])
 
+#------Функции сюжет--------
+def show_idea():
+    scenes_frame.grid_remove()
+    idea_frame.grid()
 
+def show_scenes():
+    idea_frame.grid_remove()
+    scenes_frame.grid()
+
+def save_idea():
+    plot["idea"] = idea_text.get("1.0", tk.END).strip()
+    save_all()
+
+def refresh_scines_list():
+    scenes_list.delete(0, tk.END)
+    for pa in parts:
+        scenes_list.insert(tk.END, pa["part_name"])
+
+def add_scenes():
+    part_name = entry_part_name.get().strip()
+    part_text = scenes_text.get("1.0", tk.END).strip()
+    if part_name == "":
+        print("Вы не ввели название")
+        return
+    parts.append({
+        "part_name": part_name,
+        "part_text": part_text
+    })
+    entry_part_name.delete(0, tk.END)
+    scenes_text.delete("1.0", tk.END)
+    refresh_scines_list()
+    save_all()
+
+def dell_scenes():
+    selected = scenes_list.curselection()
+    if not selected:
+        return
+    del parts [selected[0]]
+    entry_part_name.delete(0, tk.END)
+    scenes_text.delete("1.0", tk.END)
+    refresh_scines_list()
+    save_all()
+
+def on_select_scenes(event):
+    selected = scenes_list.curselection()
+    if not selected:
+        return
+    pa = parts[selected[0]]
+    entry_part_name.delete(0, tk.END)
+    entry_part_name.insert(0, pa["part_name"])
+    scenes_text.delete("1.0", tk.END)
+    scenes_text.insert("1.0", pa["part_text"])
+
+
+
+#------Фунции в боковом меню--------
 def show_caracters ():
-    #chapters_frame.pack_forget()
-    characters_frame.pack(fill="both", expand=True)
+    chapters_frame.grid_remove()
+    plot_frame.grid_remove()
+    characters_frame.grid()
 
 def show_chapters():
-    characters_frame.pack_forget()
-    #chapters_frame.pack(fill="both", expand=True)
+    characters_frame.grid_remove()
+    plot_frame.grid_remove()
+    chapters_frame.grid()
+
+def show_plot():
+    chapters_frame.grid_remove()
+    characters_frame.grid_remove()
+    plot_frame.grid()
+
 
 def save_all():
     data.save_data(all_data)    
@@ -154,16 +221,16 @@ root.grid_rowconfigure(0, weight=1) #строка растягивается
 sidebar = ctk.CTkFrame(root, width=150, corner_radius=0)
 sidebar.grid(row = 0, column = 0, sticky = "ns")
 sidebar.grid_propagate(False)
-sidebar.configure(width = 150)
+
 
 btn1 = ctk.CTkButton(sidebar, text="Персонажи", command=show_caracters)
-btn1.grid(row = 0, column = 0)
+btn1.grid(row = 0, column = 0, pady=1)
 
 btn2 = ctk.CTkButton(sidebar, text="Главы", command=show_chapters)
-btn2.grid(row = 1, column = 0)
+btn2.grid(row = 1, column = 0, pady=1)
 
-btn3 = ctk.CTkButton(sidebar, text="Сюжет")
-btn3.grid(row = 2, column = 0)
+btn3 = ctk.CTkButton(sidebar, text="Сюжет", command=show_plot)
+btn3.grid(row = 2, column = 0, pady=1)
 
 #---------Средняя часть --------
 
@@ -215,62 +282,141 @@ listbox_characters.bind("<Double-Button-1>", on_double_click)
 
 
 chapters_frame = ctk.CTkFrame(content)
-chapters_frame.grid(row = 0, column = 0)
+chapters_frame.grid(row = 0, column = 0, sticky="nsew")
 chapters_frame.grid_columnconfigure(0, weight= 0)
 chapters_frame.grid_columnconfigure( 1, weight= 1)
 chapters_frame.grid_rowconfigure(0, weight=1)
 
 # Список глав слева
 listbox_chapters = tk.Listbox(chapters_frame, width=30)
-listbox_chapters.grid(row = 0, column= 0, sticky="nsew", rowspan= )
+listbox_chapters.grid(row = 0, column= 0, sticky="nsew")
 listbox_chapters.bind("<<ListboxSelect>>", on_select_chapter)
 
 # Панель справа
 panel_chapters = ctk.CTkFrame(chapters_frame)
 panel_chapters.grid(row = 0, column = 1, sticky = "nsew", padx=10, pady=10)
+panel_chapters.grid_columnconfigure(0, weight = 1)
+panel_chapters.grid_rowconfigure(2, weight = 1)
 
 # Верхняя строка(название + статус)
 top_row = ctk.CTkFrame(panel_chapters)
 top_row.grid(row = 0, column = 0, sticky = "ew")
+top_row.grid_columnconfigure(0, weight = 0)
+top_row.grid_columnconfigure(1, weight = 0)
 
 # Название 
 title_block = ctk.CTkFrame(top_row)
-title_block.pack(side="left", padx=(0, 10))
-ctk.CTkLabel(title_block, text="Название").pack(anchor="w")
+title_block.grid(row = 0, column = 0, sticky = "w", padx=(0,10))
+ctk.CTkLabel(title_block, text="Название").grid(row = 0, column = 0, sticky = "w")
 entry_chapter_title = ctk.CTkEntry(title_block, width=300)
-entry_chapter_title.pack()
+entry_chapter_title.grid(row=1, column=0)
 
 # Статус 
 status_blok = ctk.CTkFrame(top_row)
-status_blok.pack(side="left")
-ctk.CTkLabel(status_blok, text="Статус").pack(anchor="w")
+status_blok.grid(row=0, column=1, sticky="w")
+ctk.CTkLabel(status_blok, text="Статус").grid(row=0, column=0, sticky="w")
 status_var = tk.StringVar(value="Черновик")
 status_menu = tk.OptionMenu(
     status_blok, status_var,
     "Черновик", "В работе", "Готово", "Выложено"
 )
-status_menu.pack()
+status_menu.grid(row=1, column=0)
 
 # Главы
-ctk.CTkLabel(panel_chapters, text="Главы").pack(anchor="w", pady=(0, 10))
+ctk.CTkLabel(panel_chapters, text="Главы").grid(row=1, column=0, sticky="w", pady=(0,10))
 text_chapter = ctk.CTkTextbox(panel_chapters, height=15, width=50)
-text_chapter.pack(fill="both", expand=True)
+text_chapter.grid(row=2, column=0, sticky="nsew")
 
 # Кнопки 
 buttons_row = ctk.CTkFrame(panel_chapters)
-buttons_row.pack(fill="x", pady=(10, 0))
+buttons_row.grid(row=3, column=0, sticky="ew", pady=(10,0))
 
 add_chapter_btn = ctk.CTkButton(buttons_row, text="Добавить главу", command=add_chapters)
-add_chapter_btn.pack(side="left")
+add_chapter_btn.grid(row=0, column=0, padx=1)
 
 dell_chapter_btn = ctk.CTkButton(buttons_row, text="Удалить главу", command=del_chapter)
-dell_chapter_btn.pack(side="left")
+dell_chapter_btn.grid(row=0, column=1, padx=1)
 
-chapters_frame.pack_forget()
+chapters_frame.grid_remove()
 
 
+#------Cюжет-------
+plot_frame = ctk.CTkFrame(content)
+plot_frame.grid(row = 0, column = 0, sticky="nsew")
+plot_frame.grid_columnconfigure(0, weight=1)
+plot_frame.grid_rowconfigure(0, weight=0)
+plot_frame.grid_rowconfigure(1, weight=1)
+plot_frame.grid_rowconfigure(2, weight=0)
+
+plot_top_panel = ctk.CTkFrame(plot_frame)
+plot_top_panel.grid(row=0, column=0, sticky="ew", pady=2)
+plot_top_panel.grid_columnconfigure(0, weight=0)
+plot_top_panel.grid_columnconfigure(1, weight=0)
+plot_top_panel.grid_rowconfigure(0, weight=0)
+
+btn_idea = ctk.CTkButton(plot_top_panel, text= "Идея", command=show_idea)
+btn_idea.grid(row=0, column=0, padx=1)
+btn_scenes = ctk.CTkButton(plot_top_panel, text= "Сцены", command=show_scenes)
+btn_scenes.grid(row=0, column=1, padx=1)
+
+idea_frame = ctk.CTkFrame(plot_frame)
+idea_frame.grid(row = 1, column=0, sticky="nsew", pady=5)
+idea_frame.grid_columnconfigure(0, weight=1)
+idea_frame.grid_rowconfigure(0, weight=1)
+
+idea_text = ctk.CTkTextbox(idea_frame)
+idea_text.grid(row=0, column=0, sticky="nsew")
+
+btn_idea_save = ctk.CTkButton(idea_frame, text = "Сохранить идею", command=save_idea)
+btn_idea_save.grid(row=2, column=0)
+
+idea_text.insert("1.0", plot.get("idea", ""))
+
+idea_frame.grid_remove()
+#------Раздел с идеями-----------
+scenes_frame = ctk.CTkFrame(plot_frame)
+scenes_frame.grid(row = 1, column=0, sticky="nsew")
+scenes_frame.grid_columnconfigure(0, weight=0)
+scenes_frame.grid_columnconfigure(1, weight=1)
+scenes_frame.grid_rowconfigure(0, weight=1)
+
+scenes_list = tk.Listbox(scenes_frame, width=30)
+scenes_list.grid(row=0, column=0, sticky="ns")
+scenes_list.bind("<<ListboxSelect>>", on_select_scenes)
+
+scenes_text_frame = ctk.CTkFrame(scenes_frame)
+scenes_text_frame.grid(row=0, column=1, sticky="nsew")
+scenes_text_frame.grid_rowconfigure(0, weight=0)
+scenes_text_frame.grid_rowconfigure(1, weight=0)
+scenes_text_frame.grid_rowconfigure(2, weight=0)
+scenes_text_frame.grid_rowconfigure(3, weight=1)
+scenes_text_frame.grid_columnconfigure(0, weight=1)
+
+ctk.CTkLabel(scenes_text_frame, text="Название части").grid(row=0, column=0, sticky="ew", pady=1)
+entry_part_name = ctk.CTkEntry(scenes_text_frame, width=30)
+entry_part_name.grid(row=1, column=0, sticky="ew", pady=2)
+ctk.CTkLabel(scenes_text_frame, text="Список сцен").grid(row=2, column=0, sticky="ew", pady=1)
+scenes_text = ctk.CTkTextbox(scenes_text_frame)
+scenes_text.grid(row=3, column=0, sticky="nsew")
+
+btn_add_part = ctk.CTkButton(scenes_text_frame, text="Созадть часть", command=add_scenes)
+btn_add_part.grid(row=4, column=0, pady = 2)
+btn_dell_part = ctk.CTkButton(scenes_text_frame, text="Удалить часть", command=dell_scenes)
+btn_dell_part.grid(row=5, column=0, pady = 2)
+
+
+scenes_frame.grid_remove()
+
+plot_frame.grid_remove()
 
 
 refresh_list()
-#refresh_chapters()
+refresh_chapters()
+refresh_scines_list()
+
+def on_close():
+    plot["idea"] = idea_text.get("1.0", tk.END).strip()
+    save_all()
+    root.destroy()
+root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()
