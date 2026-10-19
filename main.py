@@ -18,6 +18,7 @@ characters = all_data["characters"]
 chapters = all_data["chapters"]
 plot = all_data["plot"]
 parts = plot["parts"]
+scene_fields = []
 
 
 # ----- Логика ------
@@ -152,16 +153,15 @@ def refresh_scines_list():
 
 def add_scenes():
     part_name = entry_part_name.get().strip()
-    part_text = scenes_text.get("1.0", tk.END).strip()
+    part_scenes = get_scenes()
     if part_name == "":
-        print("Вы не ввели название")
+        print("Вы не ввели имя")
         return
     parts.append({
         "part_name": part_name,
-        "part_text": part_text
+        "scenes": part_scenes
     })
     entry_part_name.delete(0, tk.END)
-    scenes_text.delete("1.0", tk.END)
     refresh_scines_list()
     save_all()
 
@@ -171,7 +171,6 @@ def dell_scenes():
         return
     del parts [selected[0]]
     entry_part_name.delete(0, tk.END)
-    scenes_text.delete("1.0", tk.END)
     refresh_scines_list()
     save_all()
 
@@ -182,8 +181,21 @@ def on_select_scenes(event):
     pa = parts[selected[0]]
     entry_part_name.delete(0, tk.END)
     entry_part_name.insert(0, pa["part_name"])
-    scenes_text.delete("1.0", tk.END)
-    scenes_text.insert("1.0", pa["part_text"])
+    #scenes_text.delete("1.0", tk.END)
+    #scenes_text.insert("1.0", pa["part_text"])
+
+#-------Функции сцен--------
+def add_scene_field():
+    field = ctk.CTkEntry(scenes_dynamic_container, width=30)
+    field.grid(row=len(scene_fields), column=0, sticky="ew", pady=2)
+    scene_fields.append(field)
+
+def get_scenes():
+    scenes = []
+    for field in scene_fields:
+        text = field.get().strip()
+        scenes.append(text)
+    return scenes
 
 
 
@@ -396,19 +408,23 @@ ctk.CTkLabel(scenes_text_frame, text="Название части").grid(row=0, 
 entry_part_name = ctk.CTkEntry(scenes_text_frame, width=30)
 entry_part_name.grid(row=1, column=0, sticky="ew", pady=2)
 ctk.CTkLabel(scenes_text_frame, text="Список сцен").grid(row=2, column=0, sticky="ew", pady=1)
-scenes_text = ctk.CTkTextbox(scenes_text_frame)
-scenes_text.grid(row=3, column=0, sticky="nsew")
+#scenes_text = ctk.CTkTextbox(scenes_text_frame)
+#scenes_text.grid(row=3, column=0, sticky="nsew")
 
+scenes_dynamic_container = ctk.CTkFrame(scenes_text_frame)
+scenes_dynamic_container.grid(row=2, column=0, sticky="nsew")
+scenes_dynamic_container.grid_columnconfigure(0, weight=1)
+
+btn_add_scene = ctk.CTkButton(scenes_text_frame, text="Добавить сцену", command=add_scene_field)
+btn_add_scene.grid(row=5, column=0 )
 btn_add_part = ctk.CTkButton(scenes_text_frame, text="Созадть часть", command=add_scenes)
-btn_add_part.grid(row=4, column=0, pady = 2)
+btn_add_part.grid(row=6, column=0, pady = 2)
 btn_dell_part = ctk.CTkButton(scenes_text_frame, text="Удалить часть", command=dell_scenes)
-btn_dell_part.grid(row=5, column=0, pady = 2)
+btn_dell_part.grid(row=7, column=0, pady = 2)
 
 
 scenes_frame.grid_remove()
-
 plot_frame.grid_remove()
-
 
 refresh_list()
 refresh_chapters()
