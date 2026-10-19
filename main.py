@@ -19,6 +19,8 @@ chapters = all_data["chapters"]
 plot = all_data["plot"]
 parts = plot["parts"]
 scene_fields = []
+btn_x = []
+is_dirty = False
 
 
 # ----- Логика ------
@@ -175,6 +177,7 @@ def dell_scenes():
     del parts [selected[0]]
     entry_part_name.delete(0, tk.END)
     refresh_scines_list()
+    clear_scene_fields()
     save_all()
 
 def on_select_scenes(event):
@@ -186,17 +189,48 @@ def on_select_scenes(event):
     entry_part_name.insert(0, pa["part_name"])
     clear_scene_fields()
     for scene_text in pa.get("scenes", []):
+        curent_row=len(scene_fields)
+        
         field = ctk.CTkEntry(scenes_dynamic_container, width=30)
-        field.grid(row=len(scene_fields), column=0, sticky="ew", pady=2)
+        field.grid(row=curent_row, column=0, sticky="ew", pady=2)
         field.insert(0, scene_text)
+        field.bind('<KeyRelease>', mark_as_dirty)
         scene_fields.append(field)
+
+        btn_delete = ctk.CTkButton (
+            scenes_dynamic_container, 
+            text="X", width=30, fg_color="red", hover_color="darkred") 
+        btn_delete.configure(command=lambda f = field, b = btn_delete: delete_field(f,b))
+        btn_delete.grid(row=curent_row, column=1, padx=5, pady=2)
+        btn_x.append(btn_delete)
 
 
 #-------Функции сцен--------
 def add_scene_field():
-    field = ctk.CTkEntry(scenes_dynamic_container, width=30)
+    field = ctk.CTkEntry(scenes_dynamic_container, width=250)
     field.grid(row=len(scene_fields), column=0, sticky="ew", pady=2)
+    btn_delete = ctk.CTkButton(scenes_dynamic_container, text="X", width=30, fg_color="red", hover_color="darkred", command=lambda: delete_field(field, btn_delete))
+    btn_delete.grid(row=len(scene_fields), column=1, padx=5, pady=2)
     scene_fields.append(field)
+    btn_x.append(btn_delete)
+    field.bind('<KeyRelease>', mark_as_dirty)
+
+
+def delete_field(field_to_delete, btn_to_delet):
+    field_to_delete.destroy()
+    btn_to_delet.destroy()
+    if field_to_delete in scene_fields:
+        scene_fields.remove(field_to_delete)
+    if btn_to_delet in btn_x:
+        btn_x.remove(btn_to_delet)
+
+def save_current_part():
+    selected = scenes_list.curselection()
+    if selected:
+        pa = parts[selected[0]]
+        pa["part_name"] = entry_part_name.get().strip()
+        pa["scenes"] = get_scenes()
+
 
 def get_scenes():
     scenes = []
@@ -208,12 +242,59 @@ def get_scenes():
 def clear_scene_fields():
     for field in scene_fields:
         field.destroy()
+    for btn_delete in btn_x:
+        btn_delete.destroy()
     scene_fields.clear()
+    btn_x.clear()
 
 def clear_scene():
     clear_scene_fields()
     entry_part_name.delete(0, tk.END)
     scenes_list.selection_clear(0, tk.END)
+
+def save_changes():
+    selected = scenes_list.curselection()
+    if not selected:
+        print("Выберите часть из списка")
+        return
+    pa = parts[selected[0]]
+    pa["part_name"] = entry_part_name.get().strip()
+    pa["scenes"] = get_scenes()
+
+    refresh_scines_list()
+    save_all()
+
+    global is_dirty
+    is_dirty = False
+    print("Изменения сохранены")
+
+def mark_as_dirty(event):
+    global is_dirty
+    is_dirty = True
+
+def ask_save_changes(action_callback):
+    global is_dirty
+    if not is_dirty:
+        action_callback()
+        return
+    win = ctk.CTkToplevel(root)
+    win.title("Внимание")
+    win.geometry("350x150")
+    win.attributes("-topmost", True)
+    ctk.CTkLabel(win, text="Вы не сохранили изменения!\nВсе равно продолжить?").pack(pady=20)
+    #кнопака да(продоложить)
+    def confirm():
+        global is_dirty
+        is_dirty = False
+        win.deiconify()
+        action_callback()# Выполняем то что хотели 
+
+    def cancel():
+        win.destroy()
+
+    ctk.CTkButton(win, text="Да", command=confirm, fg_color="red").pack(side= "left", padx=20)
+    ctk.CTkButton(win, text="Отмена", command=cancel).pack(side="right", padx=20)
+    win.grab_set()
 
 
 #------Фунции в боковом меню--------
@@ -423,22 +504,35 @@ scenes_text_frame.grid_columnconfigure(0, weight=1)
 
 ctk.CTkLabel(scenes_text_frame, text="Название части").grid(row=0, column=0, sticky="ew", pady=1)
 entry_part_name = ctk.CTkEntry(scenes_text_frame, width=30)
+entry_part_name.bind('<KeyRelease>', mark_as_dirty)
 entry_part_name.grid(row=1, column=0, sticky="ew", pady=2)
 ctk.CTkLabel(scenes_text_frame, text="Список сцен").grid(row=2, column=0, sticky="ew", pady=1)
 
 
 scenes_dynamic_container = ctk.CTkFrame(scenes_text_frame)
-scenes_dynamic_container.grid(row=2, column=0, sticky="nsew")
+scenes_dynamic_container.grid(row=3, column=0, sticky="nsew")
 scenes_dynamic_container.grid_columnconfigure(0, weight=1)
+scenes_dynamic_container.grid_columnconfigure(1, weight=0)
 
-btn_add_scene = ctk.CTkButton(scenes_text_frame, text="Добавить сцену", command=add_scene_field)
-btn_add_scene.grid(row=5, column=0 )
-btn_add_part = ctk.CTkButton(scenes_text_frame, text="Созадть часть", command=add_scenes)
-btn_add_part.grid(row=6, column=0, pady = 2)
-btn_dell_part = ctk.CTkButton(scenes_text_frame, text="Удалить часть", command=dell_scenes)
-btn_dell_part.grid(row=7, column=0, pady = 2)
-btn_clear_scene = ctk.CTkButton(scenes_text_frame, text="Очистить", command = clear_scene)
-btn_clear_scene.grid(row =8, column=0, pady=2)
+buttons_container = ctk.CTkFrame(scenes_text_frame)
+buttons_container.grid(row=4, column=0)
+buttons_container.grid_columnconfigure(0, weight=0)
+buttons_container.grid_columnconfigure(1,weight=0)
+buttons_container.grid_rowconfigure(0, weight=0)
+
+btn_add_scene = ctk.CTkButton(buttons_container, text="Добавить сцену", command=add_scene_field)
+btn_add_scene.grid(row=0, column=0 )
+btn_add_part = ctk.CTkButton(buttons_container, text="Созадть часть", command=lambda: ask_save_changes(add_scenes))
+btn_add_part.grid(row=1, column=0, pady = 2)
+
+btn_save_changes = ctk.CTkButton(buttons_container, text="Сохранить изменения", command=save_changes)
+btn_save_changes.grid(row=2, column=0, pady=2)
+
+btn_dell_part = ctk.CTkButton(buttons_container, text="Удалить часть", command=dell_scenes)
+btn_dell_part.grid(row=1, column=1, pady = 2)
+btn_clear_scene = ctk.CTkButton(buttons_container, text="Очистить", command = clear_scene)
+btn_clear_scene.grid(row =0, column=1, pady=2)
+
 
 scenes_frame.grid_remove()
 plot_frame.grid_remove()
@@ -447,9 +541,14 @@ refresh_list()
 refresh_chapters()
 refresh_scines_list()
 
-def on_close():
+def really_close():
+    save_current_part()
     plot["idea"] = idea_text.get("1.0", tk.END).strip()
     save_all()
     root.destroy()
+
+def on_close():
+    ask_save_changes(really_close)
+
 root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()
