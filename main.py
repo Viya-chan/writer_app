@@ -22,6 +22,7 @@ scene_fields = []
 
 
 # ----- Логика ------
+#------Персонажи -------
 def refresh_list():
     listbox_characters.delete(0, tk.END)
     for ch in characters:
@@ -57,17 +58,6 @@ def del_character():
     refresh_list()
     save_all()
 
-def del_all():
-    listbox_characters.delete(0, tk.END)
-    refresh_list()
-    save_all()
-
-def on_double_click(event):
-    index = listbox_characters.nearest(event.y)
-    listbox_characters.delete(index)
-    refresh_list()
-    save_all()
-
 def on_select(event):
     selected = listbox_characters.curselection()
     if not selected:
@@ -79,6 +69,12 @@ def on_select(event):
     entry_character.insert(0, ch["character"])
     entry_appearance.delete(0, tk.END)
     entry_appearance.insert(0, ch["appearance"])
+
+def clear_character():
+    entry_name.delete(0, tk.END)
+    entry_character.delete(0, tk.END)
+    entry_appearance.delete(0, tk.END)
+    listbox_characters.select_clear(0, tk.END)
 
 # Фунции глав
 def refresh_chapters():
@@ -133,6 +129,12 @@ def on_select_chapter(event):
     text_chapter.delete("1.0", tk.END)
     text_chapter.insert("1.0", ch["text"])
 
+def clear_chapter():
+    entry_chapter_title.delete(0, tk.END)
+    listbox_chapters.selection_clear(0, tk.END)
+    text_chapter.delete("1.0", tk.END)
+    status_var.set("Черновик")
+
 #------Функции сюжет--------
 def show_idea():
     scenes_frame.grid_remove()
@@ -162,6 +164,7 @@ def add_scenes():
         "scenes": part_scenes
     })
     entry_part_name.delete(0, tk.END)
+    clear_scene_fields()
     refresh_scines_list()
     save_all()
 
@@ -206,6 +209,11 @@ def clear_scene_fields():
     for field in scene_fields:
         field.destroy()
     scene_fields.clear()
+
+def clear_scene():
+    clear_scene_fields()
+    entry_part_name.delete(0, tk.END)
+    scenes_list.selection_clear(0, tk.END)
 
 
 #------Фунции в боковом меню--------
@@ -294,11 +302,8 @@ add_button.grid(row = 6, column = 0, sticky = "ew", padx = 10, pady = 5)
 del_button = ctk.CTkButton(panel, text= "Удалить", command=del_character)
 del_button.grid(row = 7, column = 0, sticky = "ew", padx = 10, pady = 5)
 
-del_all_button = ctk.CTkButton(panel, text= "Удалить все", command= del_all)
-del_all_button.grid(row = 8, column = 0, sticky = "ew", padx = 10, pady = 5)
-
-listbox_characters.bind("<Double-Button-1>", on_double_click)
-
+btn_clear_character = ctk.CTkButton(panel, text="Очистить", command=clear_character)
+btn_clear_character.grid(row=8, column=0,  sticky = "ew", padx = 10, pady = 5)
 #----------Главы----------
 
 
@@ -357,6 +362,9 @@ add_chapter_btn.grid(row=0, column=0, padx=1)
 
 dell_chapter_btn = ctk.CTkButton(buttons_row, text="Удалить главу", command=del_chapter)
 dell_chapter_btn.grid(row=0, column=1, padx=1)
+
+btn_clear_chapter = ctk.CTkButton(buttons_row, text="Очистить", command=clear_chapter)
+btn_clear_chapter.grid(row=1, column=0, pady=1)
 
 chapters_frame.grid_remove()
 
@@ -417,8 +425,7 @@ ctk.CTkLabel(scenes_text_frame, text="Название части").grid(row=0, 
 entry_part_name = ctk.CTkEntry(scenes_text_frame, width=30)
 entry_part_name.grid(row=1, column=0, sticky="ew", pady=2)
 ctk.CTkLabel(scenes_text_frame, text="Список сцен").grid(row=2, column=0, sticky="ew", pady=1)
-#scenes_text = ctk.CTkTextbox(scenes_text_frame)
-#scenes_text.grid(row=3, column=0, sticky="nsew")
+
 
 scenes_dynamic_container = ctk.CTkFrame(scenes_text_frame)
 scenes_dynamic_container.grid(row=2, column=0, sticky="nsew")
@@ -430,7 +437,8 @@ btn_add_part = ctk.CTkButton(scenes_text_frame, text="Созадть часть"
 btn_add_part.grid(row=6, column=0, pady = 2)
 btn_dell_part = ctk.CTkButton(scenes_text_frame, text="Удалить часть", command=dell_scenes)
 btn_dell_part.grid(row=7, column=0, pady = 2)
-
+btn_clear_scene = ctk.CTkButton(scenes_text_frame, text="Очистить", command = clear_scene)
+btn_clear_scene.grid(row =8, column=0, pady=2)
 
 scenes_frame.grid_remove()
 plot_frame.grid_remove()
