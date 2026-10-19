@@ -181,8 +181,13 @@ def on_select_scenes(event):
     pa = parts[selected[0]]
     entry_part_name.delete(0, tk.END)
     entry_part_name.insert(0, pa["part_name"])
-    #scenes_text.delete("1.0", tk.END)
-    #scenes_text.insert("1.0", pa["part_text"])
+    clear_scene_fields()
+    for scene_text in pa.get("scenes", []):
+        field = ctk.CTkEntry(scenes_dynamic_container, width=30)
+        field.grid(row=len(scene_fields), column=0, sticky="ew", pady=2)
+        field.insert(0, scene_text)
+        scene_fields.append(field)
+
 
 #-------Функции сцен--------
 def add_scene_field():
@@ -197,6 +202,10 @@ def get_scenes():
         scenes.append(text)
     return scenes
 
+def clear_scene_fields():
+    for field in scene_fields:
+        field.destroy()
+    scene_fields.clear()
 
 
 #------Фунции в боковом меню--------
