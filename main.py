@@ -21,14 +21,28 @@ parts = plot["parts"]
 scene_fields = []
 btn_x = []
 is_dirty = False
+selected_character_index = None
 
 
 # ----- Логика ------
 #------Персонажи -------
 def refresh_list():
-    listbox_characters.delete(0, tk.END)
-    for ch in characters:
-        listbox_characters.insert(tk.END, ch["name"])
+    for widget in listbox_characters.winfo_children():
+        widget.destroy()
+    for index, ch in enumerate(characters):
+        btn = ctk.CTkButton(listbox_characters, text = ch["name"], command = lambda i = index : on_select_character(i))
+        btn.pack(fill="x", pady=2)
+
+def on_select_character(index):
+        global selected_character_index
+        selected_character_index = index
+        ch = characters[index]
+        entry_name.delete(0, tk.END)
+        entry_name.insert(0, ch["name"])
+        entry_appearance.delete(0, tk.END)
+        entry_appearance.insert(0, ch["appearance"])
+        entry_character.delete(0, tk.END)
+        entry_character.insert(0, ch["character"])
 
 def add_character():
     name = entry_name.get().strip()
@@ -49,13 +63,22 @@ def add_character():
     save_all()
 
 def del_character():
-    selected = listbox_characters.curselection()
-    if not selected:
+    global selected_character_index
+    if selected_character_index is None:
+        win = ctk.CTkToplevel(root)
+        win.geometry("350x150")
+        win.attributes("-topmost", True)
+
+        ctk.CTkLabel(win, text="Вы не выбрали персонажа").pack(pady=20)
+        def ok():
+            win.destroy()
+        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
         return
-    del characters[selected[0]]
+    del characters[selected_character_index]
+    selected_character_index = None
     entry_name.delete(0, tk.END)
-    entry_appearance.delete(0, tk.END)
     entry_character.delete(0, tk.END)
+    entry_appearance.delete(0, tk.END)
 
     refresh_list()
     save_all()
@@ -357,9 +380,9 @@ characters_frame.grid_columnconfigure(0, weight=0)
 characters_frame.grid_columnconfigure(1, weight=1)
 characters_frame.grid_rowconfigure(0, weight=1)
 
-listbox_characters = tk.Listbox(characters_frame, width=30)
-listbox_characters.grid(row = 0, column= 0, rowspan = 8, sticky="nsew")
-listbox_characters.bind("<<ListboxSelect>>", on_select)
+#-----------Список персонажей-------
+listbox_characters = ctk.CTkScrollableFrame(characters_frame, width=200)
+listbox_characters.grid(row =0, column=0, rowspan=8, sticky="nsew")
 
 panel = ctk.CTkFrame(characters_frame)
 panel.grid_columnconfigure(0, weight=1)     
