@@ -96,11 +96,28 @@ def on_select(event):
     entry_appearance.insert(0, ch["appearance"])
 
 def clear_character():
+    global selected_character_index
+    selected_character_index = None
     entry_name.delete(0, tk.END)
     entry_character.delete(0, tk.END)
     entry_appearance.delete(0, tk.END)
-    listbox_characters.select_clear(0, tk.END)
 
+def save_changes_charakter():
+    global selected_character_index
+    if selected_character_index is None:
+        win = ctk.CTkToplevel(root)
+        win.geometry("350x150")
+        win.attributes("-topmost", True)
+        ctk.CTkLabel(win, text="Вы не выбрали персонажа").pack(pady=20)
+        def ok():
+            win.destroy()
+        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
+        return
+    characters[selected_character_index]["name"] = entry_name.get().strip()
+    characters[selected_character_index]["appearance"] = entry_appearance.get().strip()
+    characters[selected_character_index]["character"] = entry_character.get().strip()
+    refresh_list()
+    save_all()
 # Фунции глав
 def refresh_chapters():
     listbox_chapters.delete(0, tk.END)
@@ -385,8 +402,12 @@ listbox_characters = ctk.CTkScrollableFrame(characters_frame, width=200)
 listbox_characters.grid(row =0, column=0, rowspan=8, sticky="nsew")
 
 panel = ctk.CTkFrame(characters_frame)
-panel.grid_columnconfigure(0, weight=1)     
+panel.grid_columnconfigure(0, weight=1)
+panel.grid_rowconfigure(0, weight=0)
+panel.grid_rowconfigure(1, weight=0)     
 panel.grid(row = 0, column = 1, sticky = "nsew")
+
+#--------Средняя часть у персонажей
 
 ctk.CTkLabel(panel, text="Имя").grid(row = 0, column = 0, pady=(10, 0))
 entry_name = ctk.CTkEntry(panel, width=30)
@@ -400,14 +421,22 @@ ctk.CTkLabel(panel, text="Внешность").grid(row = 4, column = 0, pady=(1
 entry_appearance = ctk.CTkEntry(panel, width=30)
 entry_appearance.grid(row = 5, column = 0, sticky = "ew", padx = 10)
 
-add_button = ctk.CTkButton(panel, text = "Добавить", command=add_character)
-add_button.grid(row = 6, column = 0, sticky = "ew", padx = 10, pady = 5)
+characters_buttons = ctk.CTkFrame(panel)
+characters_buttons.grid(row=6, column=0, sticky="ew")
+characters_buttons.grid_columnconfigure(0, weight=0)
+characters_buttons.grid_columnconfigure(1, weight=0)
 
-del_button = ctk.CTkButton(panel, text= "Удалить", command=del_character)
-del_button.grid(row = 7, column = 0, sticky = "ew", padx = 10, pady = 5)
+add_button = ctk.CTkButton(characters_buttons, text = "Добавить", command=add_character)
+add_button.grid(row = 0, column = 0, sticky = "ew", padx = 10, pady = 5)
 
-btn_clear_character = ctk.CTkButton(panel, text="Очистить", command=clear_character)
-btn_clear_character.grid(row=8, column=0,  sticky = "ew", padx = 10, pady = 5)
+del_button = ctk.CTkButton(characters_buttons, text= "Удалить", command=del_character)
+del_button.grid(row = 0, column = 1, sticky = "ew", padx = 10, pady = 5)
+
+btn_clear_character = ctk.CTkButton(characters_buttons, text="Очистить", command=clear_character)
+btn_clear_character.grid(row=1, column=0,  sticky = "ew", padx = 10, pady = 5)
+
+btn_save_changes_character = ctk.CTkButton(characters_buttons, text="Сохранить изменения", command=save_changes_charakter)
+btn_save_changes_character.grid(row=1, column=1,  sticky = "ew", padx = 10, pady = 5)
 #----------Главы----------
 
 

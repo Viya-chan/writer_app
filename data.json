@@ -1,5 +1,11 @@
 {
-  "characters": [],
+  "characters": [
+    {
+      "name": "Кирито",
+      "character": "Храбрый",
+      "appearance": "Черные волосы, ерные глаза"
+    }
+  ],
   "chapters": [
     {
       "title": "Глава 1",
