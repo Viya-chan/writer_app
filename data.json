@@ -2,8 +2,13 @@
   "characters": [
     {
       "name": "Кирито",
-      "character": "Храбрый, смелый",
-      "appearance": "Черные волосы, ерные глаза"
+      "character": "Храбрый",
+      "appearance": ""
+    },
+    {
+      "name": "Асуна",
+      "character": "",
+      "appearance": ""
     }
   ],
   "chapters": [
@@ -35,7 +40,6 @@
         "scenes": [
           "рдорд",
           "олролр",
-          "",
           ""
         ]
       },

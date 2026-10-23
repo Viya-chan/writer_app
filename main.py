@@ -27,6 +27,22 @@ selected_scenes_index = None
 
 
 # ----- Логика ------
+
+#------Проверка на дубликаты 
+def is_duplicate(data_list, key_to_chek, new_value, current_index=None):
+    for index, item in enumerate(data_list):
+        if item[key_to_chek] == new_value and index != current_index:
+            return True
+    return False
+
+#------Сообщение с ошибкой
+def show_error(message):
+    win = ctk.CTkToplevel(root)
+    win.geometry("300x150")
+    win.attributes("-topmost", True)
+    ctk.CTkLabel(win, text=message).pack()
+    ctk.CTkButton(win, text="Ok", command=win.destroy).pack()
+
 #------Персонажи -------
 def refresh_list():
     for widget in listbox_characters.winfo_children():
@@ -51,7 +67,10 @@ def add_character():
     character = entry_character.get().strip()
     appearance = entry_appearance.get().strip()
     if name == "":
-        print("Вы не ввели имя")
+        show_error("Вы не ввели имя!")
+        return
+    if is_duplicate(characters, "name", name):
+        show_error("Такое имя уже есть")
         return
     characters.append({
         "name": name,
@@ -69,14 +88,7 @@ def add_character():
 def del_character():
     global selected_character_index
     if selected_character_index is None:
-        win = ctk.CTkToplevel(root)
-        win.geometry("350x150")
-        win.attributes("-topmost", True)
-
-        ctk.CTkLabel(win, text="Вы не выбрали персонажа").pack(pady=20)
-        def ok():
-            win.destroy()
-        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
+        show_error("Вы не выбрали персонажа")
         return
     del characters[selected_character_index]
     selected_character_index = None
@@ -96,15 +108,13 @@ def clear_character():
     entry_appearance.delete(0, tk.END)
 
 def save_changes_charakter():
+    name = entry_name.get().strip()
     global selected_character_index
     if selected_character_index is None:
-        win = ctk.CTkToplevel(root)
-        win.geometry("350x150")
-        win.attributes("-topmost", True)
-        ctk.CTkLabel(win, text="Вы не выбрали персонажа").pack(pady=20)
-        def ok():
-            win.destroy()
-        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
+        show_error("Вы не выбрали персонажа")
+        return
+    if is_duplicate(characters, "name", name, selected_character_index):
+        show_error("Такое имя уже есть!")
         return
     characters[selected_character_index]["name"] = entry_name.get().strip()
     characters[selected_character_index]["appearance"] = entry_appearance.get().strip()
@@ -127,7 +137,10 @@ def add_chapters():
     text = text_chapter.get("1.0", tk.END).strip()
 
     if title == "":
-        print("Вы не ввели название главы")
+        show_error("Вы не ввели название главы")
+        return
+    if is_duplicate(chapters, "title", title):
+        show_error("Такое название уже есть")
         return
     chapters.append({
         "title": title,
@@ -146,14 +159,7 @@ def add_chapters():
 def del_chapter():
     global selected_chapter_index
     if selected_chapter_index is None:
-        win = ctk.CTkToplevel(root)
-        win.geometry("350x150")
-        win.attributes("-topmost", True)
-    
-        ctk.CTkLabel(win, text="Вы не выбрали главу").pack(pady=20)
-        def ok():
-            win.destroy()
-        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
+        show_error("Вы не выбрали главу")
         return    
     del chapters[selected_chapter_index]
 
@@ -184,15 +190,13 @@ def clear_chapter():
     status_var.set("Черновик")
 
 def save_changes_chapter():
+    title = entry_chapter_title.get().strip()
     global selected_chapter_index
     if selected_chapter_index is None:
-        win = ctk.CTkToplevel(root)
-        win.geometry("350x150")
-        win.attributes("-topmost", True)
-        ctk.CTkLabel(win, text="Вы не выбрали персонажа").pack(pady=20)
-        def ok():
-            win.destroy()
-        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
+        show_error("Вы не выбрали главу")
+        return
+    if is_duplicate(chapters, "title", title, selected_chapter_index):
+        show_error("Такое название уже есть")
         return
     chapters[selected_chapter_index]["title"]= entry_chapter_title.get().strip()
     chapters[selected_chapter_index]["status"]=status_var.get()
@@ -230,7 +234,10 @@ def add_scenes():
     part_name = entry_part_name.get().strip()
     part_scenes = get_scenes()
     if part_name == "":
-        print("Вы не ввели имя")
+        show_error("Вы не ввели название")
+        return
+    if is_duplicate(parts, "part_name", part_name):
+        show_error("Такое название уже есть")
         return
     parts.append({
         "part_name": part_name,
@@ -244,6 +251,7 @@ def add_scenes():
 def dell_scenes():
     global selected_scenes_index
     if selected_scenes_index is None:
+        show_error("Вы не выбрали часть")
         return
     del parts [selected_scenes_index]
     selected_scenes_index = None
@@ -299,9 +307,9 @@ def save_current_part():
     global selected_scenes_index
     if selected_scenes_index is None:
         return
-        pa = parts[selected_scenes_index]
-        pa["part_name"] = entry_part_name.get().strip()
-        pa["scenes"] = get_scenes()
+    pa = parts[selected_scenes_index]
+    pa["part_name"] = entry_part_name.get().strip()
+    pa["scenes"] = get_scenes()
 
 
 def get_scenes():
@@ -460,7 +468,7 @@ characters_buttons.grid(row=6, column=0, sticky="ew")
 characters_buttons.grid_columnconfigure(0, weight=0)
 characters_buttons.grid_columnconfigure(1, weight=0)
 
-add_button = ctk.CTkButton(characters_buttons, text = "Добавить", command=lambda:ask_save_changes(add_character))
+add_button = ctk.CTkButton(characters_buttons, text = "Добавить", command=add_character)
 add_button.grid(row = 0, column = 0, sticky = "ew", padx = 10, pady = 5)
 
 del_button = ctk.CTkButton(characters_buttons, text= "Удалить", command=del_character)
