@@ -42,7 +42,22 @@ def show_error(message):
     win.attributes("-topmost", True)
     ctk.CTkLabel(win, text=message).pack()
     ctk.CTkButton(win, text="Ok", command=win.destroy).pack()
+# -------Предупреждение об удалении 
+def ask_confirm(message, action_callback):
+    win = ctk.CTkToplevel(root)
+    win.title("Подтверждение")
+    win.geometry("350x150")
+    win.attributes("-topmost", True)
 
+    ctk.CTkLabel(win, text=message).pack(pady=20)
+
+    def confirm():
+        win.destroy()
+        action_callback()
+    def cancel():
+        win.destroy()
+    ctk.CTkButton(win, text="Да, удалить", command=confirm, fg_color="red").pack(side="left", padx=20)
+    ctk.CTkButton(win, text="Отмена", command=cancel).pack(side="right", padx=20)
 #------Персонажи -------
 def refresh_list():
     for widget in listbox_characters.winfo_children():
@@ -90,14 +105,17 @@ def del_character():
     if selected_character_index is None:
         show_error("Вы не выбрали персонажа")
         return
-    del characters[selected_character_index]
-    selected_character_index = None
-    entry_name.delete(0, tk.END)
-    entry_character.delete(0, tk.END)
-    entry_appearance.delete(0, tk.END)
+    def do_delete():
+        global selected_character_index
+        del characters[selected_character_index]
+        selected_character_index = None
+        entry_name.delete(0, tk.END)
+        entry_character.delete(0, tk.END)
+        entry_appearance.delete(0, tk.END)
 
-    refresh_list()
-    save_all()
+        refresh_list()
+        save_all()
+    ask_confirm("Вы точно хотите удалить персонажа?", do_delete)
 
 
 def clear_character():
@@ -161,14 +179,17 @@ def del_chapter():
     if selected_chapter_index is None:
         show_error("Вы не выбрали главу")
         return    
-    del chapters[selected_chapter_index]
+    def do_delete():
+        global selected_chapter_index
+        del chapters[selected_chapter_index]
 
-    entry_chapter_title.delete(0, tk.END)
-    status_var.set("Черновик")
-    text_chapter.delete("1.0", tk.END)
+        entry_chapter_title.delete(0, tk.END)
+        status_var.set("Черновик")
+        text_chapter.delete("1.0", tk.END)
 
-    refresh_chapters()
-    save_all()
+        refresh_chapters()
+        save_all()
+    ask_confirm("Вы точно хотите удалить главу?", do_delete)
 
 def on_select_chapter(index):
     global selected_chapter_index
@@ -253,12 +274,15 @@ def dell_scenes():
     if selected_scenes_index is None:
         show_error("Вы не выбрали часть")
         return
-    del parts [selected_scenes_index]
-    selected_scenes_index = None
-    entry_part_name.delete(0, tk.END)
-    refresh_scenes_list()
-    clear_scene_fields()
-    save_all()
+    def do_delete():
+        global selected_scenes_index
+        del parts [selected_scenes_index]
+        selected_scenes_index = None
+        entry_part_name.delete(0, tk.END)
+        refresh_scenes_list()
+        clear_scene_fields()
+        save_all()
+    ask_confirm("Вы точно хотите удалить часть?", do_delete)
 
 def on_select_scenes(index):
     global selected_scenes_index
@@ -533,7 +557,7 @@ text_chapter.grid(row=2, column=0, sticky="nsew")
 buttons_row = ctk.CTkFrame(panel_chapters)
 buttons_row.grid(row=3, column=0, sticky="ew", pady=(10,0))
 
-add_chapter_btn = ctk.CTkButton(buttons_row, text="Добавить главу", command=lambda:ask_save_changes(add_chapters))
+add_chapter_btn = ctk.CTkButton(buttons_row, text="Добавить главу", command=add_chapters)
 add_chapter_btn.grid(row=0, column=0, padx=1)
 
 dell_chapter_btn = ctk.CTkButton(buttons_row, text="Удалить главу", command=del_chapter)
@@ -621,7 +645,7 @@ buttons_container.grid_rowconfigure(0, weight=0)
 
 btn_add_scene = ctk.CTkButton(buttons_container, text="Добавить сцену", command=add_scene_field)
 btn_add_scene.grid(row=0, column=0 )
-btn_add_part = ctk.CTkButton(buttons_container, text="Созадть часть", command=lambda: ask_save_changes(add_scenes))
+btn_add_part = ctk.CTkButton(buttons_container, text="Созадть часть", command=add_scenes)
 btn_add_part.grid(row=1, column=0, pady = 2)
 
 btn_save_changes = ctk.CTkButton(buttons_container, text="Сохранить изменения", command=save_changes)
