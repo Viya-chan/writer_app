@@ -22,6 +22,7 @@ scene_fields = []
 btn_x = []
 is_dirty = False
 selected_character_index = None
+selected_chapter_index = None
 
 
 # ----- Логика ------
@@ -118,11 +119,13 @@ def save_changes_charakter():
     characters[selected_character_index]["character"] = entry_character.get().strip()
     refresh_list()
     save_all()
-# Фунции глав
+#-------- Фунции глав
 def refresh_chapters():
-    listbox_chapters.delete(0, tk.END)
-    for ch in chapters:
-        listbox_chapters.insert(tk.END, ch["title"])
+    for widget in listbox_chapters.winfo_children():
+        widget.destroy()
+    for index, ch in enumerate(chapters):
+        btn = ctk.CTkButton(listbox_chapters, text=ch["title"], command = lambda i = index: on_select_chapter(i))
+        btn.pack(fill="x", pady=2)
 
 def add_chapters():
     title = entry_chapter_title.get().strip()
@@ -145,10 +148,18 @@ def add_chapters():
     save_all()
 
 def del_chapter():
-    selected = listbox_chapters.curselection()
-    if not selected:
-        return
-    del chapters[selected[0]]
+    global selected_chapter_index
+    if selected_chapter_index is None:
+        win = ctk.CTkToplevel(root)
+        win.geometry("350x150")
+        win.attributes("-topmost", True)
+    
+        ctk.CTkLabel(win, text="Вы не выбрали главу").pack(pady=20)
+        def ok():
+            win.destroy()
+        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
+        return    
+    del chapters[selected_chapter_index]
 
     entry_chapter_title.delete(0, tk.END)
     status_var.set("Черновик")
@@ -157,11 +168,11 @@ def del_chapter():
     refresh_chapters()
     save_all()
 
-def on_select_chapter(event):
-    selected = listbox_chapters.curselection()
-    if not selected:
-        return
-    ch = chapters[selected[0]]
+def on_select_chapter(index):
+    global selected_chapter_index
+    selected_chapter_index = index
+
+    ch = chapters[index]
 
     entry_chapter_title.delete(0, tk.END)
     entry_chapter_title.insert(0, ch["title"])
@@ -173,9 +184,27 @@ def on_select_chapter(event):
 
 def clear_chapter():
     entry_chapter_title.delete(0, tk.END)
-    listbox_chapters.selection_clear(0, tk.END)
     text_chapter.delete("1.0", tk.END)
     status_var.set("Черновик")
+
+def save_changes_chapter():
+    global selected_chapter_index
+    if selected_chapter_index is None:
+        win = ctk.CTkToplevel(root)
+        win.geometry("350x150")
+        win.attributes("-topmost", True)
+        ctk.CTkLabel(win, text="Вы не выбрали персонажа").pack(pady=20)
+        def ok():
+            win.destroy()
+        btn_ok = ctk.CTkButton(win, text="Ok", command=ok).pack(padx=20)
+        return
+    chapters[selected_chapter_index]["title"]= entry_chapter_title.get().strip()
+    chapters[selected_chapter_index]["status"]=status_var.get()
+    chapters[selected_chapter_index]["text"]=text_chapter.get("1.0", tk.END).strip()
+    refresh_chapters()
+    save_all()
+
+
 
 #------Функции сюжет--------
 def show_idea():
@@ -447,9 +476,8 @@ chapters_frame.grid_columnconfigure( 1, weight= 1)
 chapters_frame.grid_rowconfigure(0, weight=1)
 
 # Список глав слева
-listbox_chapters = tk.Listbox(chapters_frame, width=30)
-listbox_chapters.grid(row = 0, column= 0, sticky="nsew")
-listbox_chapters.bind("<<ListboxSelect>>", on_select_chapter)
+listbox_chapters = ctk.CTkScrollableFrame(chapters_frame, width=200)
+listbox_chapters.grid(row=0, column=0, sticky="nsew")
 
 # Панель справа
 panel_chapters = ctk.CTkFrame(chapters_frame)
@@ -498,6 +526,9 @@ dell_chapter_btn.grid(row=0, column=1, padx=1)
 
 btn_clear_chapter = ctk.CTkButton(buttons_row, text="Очистить", command=clear_chapter)
 btn_clear_chapter.grid(row=1, column=0, pady=1)
+
+btn_save_changes_chapter = ctk.CTkButton(buttons_row, text="Сохранить изменения", command=save_changes_chapter)
+btn_save_changes_chapter.grid(row= 1, column=1, pady=1)
 
 chapters_frame.grid_remove()
 
