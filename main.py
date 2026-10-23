@@ -23,6 +23,7 @@ btn_x = []
 is_dirty = False
 selected_character_index = None
 selected_chapter_index = None
+selected_scenes_index = None
 
 
 # ----- Логика ------
@@ -60,6 +61,8 @@ def add_character():
     entry_name.delete(0, tk.END)
     entry_character.delete(0, tk.END)
     entry_appearance.delete(0, tk.END)
+    global is_dirty
+    is_dirty = False
     refresh_list()
     save_all()
 
@@ -84,17 +87,6 @@ def del_character():
     refresh_list()
     save_all()
 
-def on_select(event):
-    selected = listbox_characters.curselection()
-    if not selected:
-        return
-    ch = characters[selected[0]]
-    entry_name.delete(0, tk.END)
-    entry_name.insert(0, ch["name"])
-    entry_character.delete(0, tk.END)
-    entry_character.insert(0, ch["character"])
-    entry_appearance.delete(0, tk.END)
-    entry_appearance.insert(0, ch["appearance"])
 
 def clear_character():
     global selected_character_index
@@ -117,6 +109,8 @@ def save_changes_charakter():
     characters[selected_character_index]["name"] = entry_name.get().strip()
     characters[selected_character_index]["appearance"] = entry_appearance.get().strip()
     characters[selected_character_index]["character"] = entry_character.get().strip()
+    global is_dirty
+    is_dirty = False
     refresh_list()
     save_all()
 #-------- Фунции глав
@@ -144,6 +138,8 @@ def add_chapters():
     entry_chapter_title.delete(0, tk.END)
     status_var.set("Черновик")
     text_chapter.delete("1.0",tk.END)
+    global is_dirty
+    is_dirty = False
     refresh_chapters()
     save_all()
 
@@ -201,6 +197,8 @@ def save_changes_chapter():
     chapters[selected_chapter_index]["title"]= entry_chapter_title.get().strip()
     chapters[selected_chapter_index]["status"]=status_var.get()
     chapters[selected_chapter_index]["text"]=text_chapter.get("1.0", tk.END).strip()
+    global is_dirty
+    is_dirty = False
     refresh_chapters()
     save_all()
 
@@ -217,12 +215,16 @@ def show_scenes():
 
 def save_idea():
     plot["idea"] = idea_text.get("1.0", tk.END).strip()
+    global is_dirty
+    is_dirty = False
     save_all()
 
-def refresh_scines_list():
-    scenes_list.delete(0, tk.END)
-    for pa in parts:
-        scenes_list.insert(tk.END, pa["part_name"])
+def refresh_scenes_list():
+    for widget in scenes_list.winfo_children():
+        widget.destroy()
+    for index, pa in enumerate(parts):
+        btn = ctk.CTkButton(scenes_list, text=pa["part_name"], command=lambda i = index: on_select_scenes(i))
+        btn.pack(fill="x", pady=2)
 
 def add_scenes():
     part_name = entry_part_name.get().strip()
@@ -236,24 +238,24 @@ def add_scenes():
     })
     entry_part_name.delete(0, tk.END)
     clear_scene_fields()
-    refresh_scines_list()
+    refresh_scenes_list()
     save_all()
 
 def dell_scenes():
-    selected = scenes_list.curselection()
-    if not selected:
+    global selected_scenes_index
+    if selected_scenes_index is None:
         return
-    del parts [selected[0]]
+    del parts [selected_scenes_index]
+    selected_scenes_index = None
     entry_part_name.delete(0, tk.END)
-    refresh_scines_list()
+    refresh_scenes_list()
     clear_scene_fields()
     save_all()
 
-def on_select_scenes(event):
-    selected = scenes_list.curselection()
-    if not selected:
-        return
-    pa = parts[selected[0]]
+def on_select_scenes(index):
+    global selected_scenes_index
+    selected_scenes_index = index
+    pa = parts[index]
     entry_part_name.delete(0, tk.END)
     entry_part_name.insert(0, pa["part_name"])
     clear_scene_fields()
@@ -294,9 +296,10 @@ def delete_field(field_to_delete, btn_to_delet):
         btn_x.remove(btn_to_delet)
 
 def save_current_part():
-    selected = scenes_list.curselection()
-    if selected:
-        pa = parts[selected[0]]
+    global selected_scenes_index
+    if selected_scenes_index is None:
+        return
+        pa = parts[selected_scenes_index]
         pa["part_name"] = entry_part_name.get().strip()
         pa["scenes"] = get_scenes()
 
@@ -319,18 +322,17 @@ def clear_scene_fields():
 def clear_scene():
     clear_scene_fields()
     entry_part_name.delete(0, tk.END)
-    scenes_list.selection_clear(0, tk.END)
+    selected_scenes_index = None
 
 def save_changes():
-    selected = scenes_list.curselection()
-    if not selected:
-        print("Выберите часть из списка")
+    global selected_scenes_index
+    if selected_scenes_index is None:
         return
-    pa = parts[selected[0]]
+    pa = parts[selected_scenes_index]
     pa["part_name"] = entry_part_name.get().strip()
     pa["scenes"] = get_scenes()
 
-    refresh_scines_list()
+    refresh_scenes_list()
     save_all()
 
     global is_dirty
@@ -440,14 +442,17 @@ panel.grid(row = 0, column = 1, sticky = "nsew")
 
 ctk.CTkLabel(panel, text="Имя").grid(row = 0, column = 0, pady=(10, 0))
 entry_name = ctk.CTkEntry(panel, width=30)
+entry_name.bind("<KeyRelease>", mark_as_dirty)
 entry_name.grid(row = 1, column = 0, sticky = "ew", padx = 10)
 
 ctk.CTkLabel(panel, text="Характер").grid(row = 2, column = 0, pady=(10, 0))
 entry_character = ctk.CTkEntry(panel, width=30)
+entry_character.bind("<KeyRelease>", mark_as_dirty)
 entry_character.grid(row = 3, column = 0, sticky = "ew", padx = 10)
 
 ctk.CTkLabel(panel, text="Внешность").grid(row = 4, column = 0, pady=(10, 0))
 entry_appearance = ctk.CTkEntry(panel, width=30)
+entry_appearance.bind("<KeyRelease>", mark_as_dirty)
 entry_appearance.grid(row = 5, column = 0, sticky = "ew", padx = 10)
 
 characters_buttons = ctk.CTkFrame(panel)
@@ -455,13 +460,13 @@ characters_buttons.grid(row=6, column=0, sticky="ew")
 characters_buttons.grid_columnconfigure(0, weight=0)
 characters_buttons.grid_columnconfigure(1, weight=0)
 
-add_button = ctk.CTkButton(characters_buttons, text = "Добавить", command=add_character)
+add_button = ctk.CTkButton(characters_buttons, text = "Добавить", command=lambda:ask_save_changes(add_character))
 add_button.grid(row = 0, column = 0, sticky = "ew", padx = 10, pady = 5)
 
 del_button = ctk.CTkButton(characters_buttons, text= "Удалить", command=del_character)
 del_button.grid(row = 0, column = 1, sticky = "ew", padx = 10, pady = 5)
 
-btn_clear_character = ctk.CTkButton(characters_buttons, text="Очистить", command=clear_character)
+btn_clear_character = ctk.CTkButton(characters_buttons, text="Очистить", command=lambda:ask_save_changes(clear_character))
 btn_clear_character.grid(row=1, column=0,  sticky = "ew", padx = 10, pady = 5)
 
 btn_save_changes_character = ctk.CTkButton(characters_buttons, text="Сохранить изменения", command=save_changes_charakter)
@@ -496,6 +501,7 @@ title_block = ctk.CTkFrame(top_row)
 title_block.grid(row = 0, column = 0, sticky = "w", padx=(0,10))
 ctk.CTkLabel(title_block, text="Название").grid(row = 0, column = 0, sticky = "w")
 entry_chapter_title = ctk.CTkEntry(title_block, width=300)
+entry_chapter_title.bind("<KeyRelease>", mark_as_dirty)
 entry_chapter_title.grid(row=1, column=0)
 
 # Статус 
@@ -512,19 +518,20 @@ status_menu.grid(row=1, column=0)
 # Главы
 ctk.CTkLabel(panel_chapters, text="Главы").grid(row=1, column=0, sticky="w", pady=(0,10))
 text_chapter = ctk.CTkTextbox(panel_chapters, height=15, width=50)
+text_chapter.bind("<KeyRelease>", mark_as_dirty)
 text_chapter.grid(row=2, column=0, sticky="nsew")
 
 # Кнопки 
 buttons_row = ctk.CTkFrame(panel_chapters)
 buttons_row.grid(row=3, column=0, sticky="ew", pady=(10,0))
 
-add_chapter_btn = ctk.CTkButton(buttons_row, text="Добавить главу", command=add_chapters)
+add_chapter_btn = ctk.CTkButton(buttons_row, text="Добавить главу", command=lambda:ask_save_changes(add_chapters))
 add_chapter_btn.grid(row=0, column=0, padx=1)
 
 dell_chapter_btn = ctk.CTkButton(buttons_row, text="Удалить главу", command=del_chapter)
 dell_chapter_btn.grid(row=0, column=1, padx=1)
 
-btn_clear_chapter = ctk.CTkButton(buttons_row, text="Очистить", command=clear_chapter)
+btn_clear_chapter = ctk.CTkButton(buttons_row, text="Очистить", command=lambda:ask_save_changes(clear_chapter))
 btn_clear_chapter.grid(row=1, column=0, pady=1)
 
 btn_save_changes_chapter = ctk.CTkButton(buttons_row, text="Сохранить изменения", command=save_changes_chapter)
@@ -558,6 +565,7 @@ idea_frame.grid_columnconfigure(0, weight=1)
 idea_frame.grid_rowconfigure(0, weight=1)
 
 idea_text = ctk.CTkTextbox(idea_frame)
+idea_text.bind("<KeyRelease>", mark_as_dirty)
 idea_text.grid(row=0, column=0, sticky="nsew")
 
 btn_idea_save = ctk.CTkButton(idea_frame, text = "Сохранить идею", command=save_idea)
@@ -573,9 +581,9 @@ scenes_frame.grid_columnconfigure(0, weight=0)
 scenes_frame.grid_columnconfigure(1, weight=1)
 scenes_frame.grid_rowconfigure(0, weight=1)
 
-scenes_list = tk.Listbox(scenes_frame, width=30)
+scenes_list = ctk.CTkScrollableFrame(scenes_frame, width=200)
 scenes_list.grid(row=0, column=0, sticky="ns")
-scenes_list.bind("<<ListboxSelect>>", on_select_scenes)
+
 
 scenes_text_frame = ctk.CTkFrame(scenes_frame)
 scenes_text_frame.grid(row=0, column=1, sticky="nsew")
@@ -622,7 +630,7 @@ plot_frame.grid_remove()
 
 refresh_list()
 refresh_chapters()
-refresh_scines_list()
+refresh_scenes_list()
 
 def really_close():
     save_current_part()
