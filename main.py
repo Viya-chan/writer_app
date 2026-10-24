@@ -3,30 +3,9 @@ import customtkinter as ctk
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
-import json
-import os
-import data
-#------ Данные и память ------
-all_data = data.load_data()
-if "characters" not in all_data:
-    all_data["characters"] = []
-if "chapters" not in all_data:
-    all_data["chapters"] = []
-if "plot" not in all_data:
-    all_data["plot"] = {"idea":"", "parts":[]}
-characters = all_data["characters"]
-chapters = all_data["chapters"]
-plot = all_data["plot"]
-parts = plot["parts"]
-scene_fields = []
-btn_x = []
-is_dirty = False
-selected_character_index = None
-selected_chapter_index = None
-selected_scenes_index = None
 
-
-# ----- Логика ------
+import data_meneger
+from data_meneger import characters, chapters, plot, parts, save_all, scene_fields, btn_x
 
 #------Проверка на дубликаты 
 def is_duplicate(data_list, key_to_chek, new_value, current_index=None):
@@ -67,8 +46,7 @@ def refresh_list():
         btn.pack(fill="x", pady=2)
 
 def on_select_character(index):
-        global selected_character_index
-        selected_character_index = index
+        data_meneger.selected_character_index = index
         ch = characters[index]
         entry_name.delete(0, tk.END)
         entry_name.insert(0, ch["name"])
@@ -95,19 +73,16 @@ def add_character():
     entry_name.delete(0, tk.END)
     entry_character.delete(0, tk.END)
     entry_appearance.delete(0, tk.END)
-    global is_dirty
-    is_dirty = False
+    data_meneger.is_dirty = False
     refresh_list()
     save_all()
 
 def del_character():
-    global selected_character_index
-    if selected_character_index is None:
+    if data_meneger.selected_character_index is None:
         show_error("Вы не выбрали персонажа")
         return
     def do_delete():
-        global selected_character_index
-        del characters[selected_character_index]
+        del characters[data_meneger.selected_character_index]
         selected_character_index = None
         entry_name.delete(0, tk.END)
         entry_character.delete(0, tk.END)
@@ -119,26 +94,23 @@ def del_character():
 
 
 def clear_character():
-    global selected_character_index
-    selected_character_index = None
+    data_meneger.selected_character_index = None
     entry_name.delete(0, tk.END)
     entry_character.delete(0, tk.END)
     entry_appearance.delete(0, tk.END)
 
 def save_changes_charakter():
     name = entry_name.get().strip()
-    global selected_character_index
-    if selected_character_index is None:
+    if data_meneger.selected_character_index is None:
         show_error("Вы не выбрали персонажа")
         return
     if is_duplicate(characters, "name", name, selected_character_index):
         show_error("Такое имя уже есть!")
         return
-    characters[selected_character_index]["name"] = entry_name.get().strip()
-    characters[selected_character_index]["appearance"] = entry_appearance.get().strip()
-    characters[selected_character_index]["character"] = entry_character.get().strip()
-    global is_dirty
-    is_dirty = False
+    characters[data_meneger.selected_character_index]["name"] = entry_name.get().strip()
+    characters[data_meneger.selected_character_index]["appearance"] = entry_appearance.get().strip()
+    characters[data_meneger.selected_character_index]["character"] = entry_character.get().strip()
+    data_meneger.is_dirty = False
     refresh_list()
     save_all()
 #-------- Фунции глав
@@ -169,19 +141,16 @@ def add_chapters():
     entry_chapter_title.delete(0, tk.END)
     status_var.set("Черновик")
     text_chapter.delete("1.0",tk.END)
-    global is_dirty
-    is_dirty = False
+    data_meneger.is_dirty = False
     refresh_chapters()
     save_all()
 
 def del_chapter():
-    global selected_chapter_index
-    if selected_chapter_index is None:
+    if data_meneger.selected_chapter_index is None:
         show_error("Вы не выбрали главу")
         return    
     def do_delete():
-        global selected_chapter_index
-        del chapters[selected_chapter_index]
+        del chapters[data_meneger.selected_chapter_index]
 
         entry_chapter_title.delete(0, tk.END)
         status_var.set("Черновик")
@@ -192,8 +161,7 @@ def del_chapter():
     ask_confirm("Вы точно хотите удалить главу?", do_delete)
 
 def on_select_chapter(index):
-    global selected_chapter_index
-    selected_chapter_index = index
+    data_meneger.selected_chapter_index = index
 
     ch = chapters[index]
 
@@ -212,18 +180,17 @@ def clear_chapter():
 
 def save_changes_chapter():
     title = entry_chapter_title.get().strip()
-    global selected_chapter_index
-    if selected_chapter_index is None:
+
+    if data_meneger.selected_chapter_index is None:
         show_error("Вы не выбрали главу")
         return
     if is_duplicate(chapters, "title", title, selected_chapter_index):
         show_error("Такое название уже есть")
         return
-    chapters[selected_chapter_index]["title"]= entry_chapter_title.get().strip()
-    chapters[selected_chapter_index]["status"]=status_var.get()
-    chapters[selected_chapter_index]["text"]=text_chapter.get("1.0", tk.END).strip()
-    global is_dirty
-    is_dirty = False
+    chapters[data_meneger.selected_chapter_index]["title"]= entry_chapter_title.get().strip()
+    chapters[data_meneger.selected_chapter_index]["status"]=status_var.get()
+    chapters[data_meneger.selected_chapter_index]["text"]=text_chapter.get("1.0", tk.END).strip()
+    data_meneger.is_dirty = False
     refresh_chapters()
     save_all()
 
@@ -240,8 +207,7 @@ def show_scenes():
 
 def save_idea():
     plot["idea"] = idea_text.get("1.0", tk.END).strip()
-    global is_dirty
-    is_dirty = False
+    data_meneger.is_dirty = False
     save_all()
 
 def refresh_scenes_list():
@@ -270,13 +236,11 @@ def add_scenes():
     save_all()
 
 def dell_scenes():
-    global selected_scenes_index
-    if selected_scenes_index is None:
+    if data_meneger.selected_scenes_index is None:
         show_error("Вы не выбрали часть")
         return
     def do_delete():
-        global selected_scenes_index
-        del parts [selected_scenes_index]
+        del parts [data_meneger.selected_scenes_index]
         selected_scenes_index = None
         entry_part_name.delete(0, tk.END)
         refresh_scenes_list()
@@ -285,8 +249,7 @@ def dell_scenes():
     ask_confirm("Вы точно хотите удалить часть?", do_delete)
 
 def on_select_scenes(index):
-    global selected_scenes_index
-    selected_scenes_index = index
+    data_meneger.selected_scenes_index = index
     pa = parts[index]
     entry_part_name.delete(0, tk.END)
     entry_part_name.insert(0, pa["part_name"])
@@ -328,10 +291,9 @@ def delete_field(field_to_delete, btn_to_delet):
         btn_x.remove(btn_to_delet)
 
 def save_current_part():
-    global selected_scenes_index
-    if selected_scenes_index is None:
+    if data_meneger.selected_scenes_index is None:
         return
-    pa = parts[selected_scenes_index]
+    pa = parts[data_meneger.selected_scenes_index]
     pa["part_name"] = entry_part_name.get().strip()
     pa["scenes"] = get_scenes()
 
@@ -354,31 +316,26 @@ def clear_scene_fields():
 def clear_scene():
     clear_scene_fields()
     entry_part_name.delete(0, tk.END)
-    global selected_scenes_index
-    selected_scenes_index = None
+    data_meneger.selected_scenes_index = None
 
 def save_changes():
-    global selected_scenes_index
-    if selected_scenes_index is None:
+    if data_meneger.selected_scenes_index is None:
         return
-    pa = parts[selected_scenes_index]
+    pa = parts[data_meneger.selected_scenes_index]
     pa["part_name"] = entry_part_name.get().strip()
     pa["scenes"] = get_scenes()
 
     refresh_scenes_list()
     save_all()
 
-    global is_dirty
-    is_dirty = False
+    data_meneger.is_dirty = False
     print("Изменения сохранены")
 
 def mark_as_dirty(event):
-    global is_dirty
-    is_dirty = True
+    data_meneger.is_dirty = True
 
 def ask_save_changes(action_callback):
-    global is_dirty
-    if not is_dirty:
+    if not data_meneger.is_dirty:
         action_callback()
         return
     win = ctk.CTkToplevel(root)
@@ -388,8 +345,7 @@ def ask_save_changes(action_callback):
     ctk.CTkLabel(win, text="Вы не сохранили изменения!\nВсе равно продолжить?").pack(pady=20)
     #кнопака да(продоложить)
     def confirm():
-        global is_dirty
-        is_dirty = False
+        data_meneger.is_dirty = False
         win.deiconify()
         action_callback()# Выполняем то что хотели 
 
@@ -416,10 +372,7 @@ def show_plot():
     chapters_frame.grid_remove()
     characters_frame.grid_remove()
     plot_frame.grid()
-
-
-def save_all():
-    data.save_data(all_data)    
+    
 
 # ------ Интерфейс ------ 
 # ------Главное окно --------       
