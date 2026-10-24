@@ -5,7 +5,7 @@ ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
 import data_meneger
-from data_meneger import characters, chapters, plot, parts, save_all, scene_fields, btn_x
+from data_meneger import characters, chapters, plot, parts, save_all, scene_fields, btn_x, selected_chapter_index, selected_character_index, selected_scenes_index
 
 #------Проверка на дубликаты 
 def is_duplicate(data_list, key_to_chek, new_value, current_index=None):
