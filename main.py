@@ -354,6 +354,7 @@ def clear_scene_fields():
 def clear_scene():
     clear_scene_fields()
     entry_part_name.delete(0, tk.END)
+    global selected_scenes_index
     selected_scenes_index = None
 
 def save_changes():
