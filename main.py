@@ -240,14 +240,10 @@ sidebar.grid_propagate(False)
 
 btn1 = ctk.CTkButton(sidebar, text="Персонажи", command=show_caracters)
 btn1.grid(row = 0, column = 0, pady=1)
-btn1.grid(row = 0, column = 0, pady=1)
 
 btn2 = ctk.CTkButton(sidebar, text="Главы", command=show_chapters)
 btn2.grid(row = 1, column = 0, pady=1)
-btn2.grid(row = 1, column = 0, pady=1)
 
-btn3 = ctk.CTkButton(sidebar, text="Сюжет", command=show_plot)
-btn3.grid(row = 2, column = 0, pady=1)
 btn3 = ctk.CTkButton(sidebar, text="Сюжет", command=show_plot)
 btn3.grid(row = 2, column = 0, pady=1)
 
@@ -265,50 +261,6 @@ chapters_frame = chapters_tab.ChaptersTab(content)
 content.grid_columnconfigure(0, weight=1)
 content.grid_rowconfigure(0, weight=1)
 
-
-#------Cюжет-------
-plot_frame = ctk.CTkFrame(content)
-plot_frame.grid(row = 0, column = 0, sticky="nsew")
-plot_frame.grid_columnconfigure(0, weight=1)
-plot_frame.grid_rowconfigure(0, weight=0)
-plot_frame.grid_rowconfigure(1, weight=1)
-plot_frame.grid_rowconfigure(2, weight=0)
-
-plot_top_panel = ctk.CTkFrame(plot_frame)
-plot_top_panel.grid(row=0, column=0, sticky="ew", pady=2)
-plot_top_panel.grid_columnconfigure(0, weight=0)
-plot_top_panel.grid_columnconfigure(1, weight=0)
-plot_top_panel.grid_rowconfigure(0, weight=0)
-
-btn_idea = ctk.CTkButton(plot_top_panel, text= "Идея", command=show_idea)
-btn_idea.grid(row=0, column=0, padx=1)
-btn_scenes = ctk.CTkButton(plot_top_panel, text= "Сцены", command=show_scenes)
-btn_scenes.grid(row=0, column=1, padx=1)
-
-idea_frame = ctk.CTkFrame(plot_frame)
-idea_frame.grid(row = 1, column=0, sticky="nsew", pady=5)
-idea_frame.grid_columnconfigure(0, weight=1)
-idea_frame.grid_rowconfigure(0, weight=1)
-
-idea_text = ctk.CTkTextbox(idea_frame)
-idea_text.bind("<KeyRelease>", mark_as_dirty)
-idea_text.grid(row=0, column=0, sticky="nsew")
-
-btn_idea_save = ctk.CTkButton(idea_frame, text = "Сохранить идею", command=save_idea)
-btn_idea_save.grid(row=2, column=0)
-
-idea_text.insert("1.0", plot.get("idea", ""))
-
-idea_frame.grid_remove()
-#------Раздел с идеями-----------
-scenes_frame = ctk.CTkFrame(plot_frame)
-scenes_frame.grid(row = 1, column=0, sticky="nsew")
-scenes_frame.grid_columnconfigure(0, weight=0)
-scenes_frame.grid_columnconfigure(1, weight=1)
-scenes_frame.grid_rowconfigure(0, weight=1)
-
-scenes_list = ctk.CTkScrollableFrame(scenes_frame, width=200)
-scenes_list.grid(row=0, column=0, sticky="ns")
 
 #------Cюжет-------
 plot_frame = ctk.CTkFrame(content)
@@ -395,8 +347,9 @@ btn_clear_scene = ctk.CTkButton(buttons_container, text="Очистить", comm
 btn_clear_scene.grid(row =0, column=1, pady=2)
 
 
-scenes_frame.grid_remove()
-plot_frame.grid_remove()
+character_frame.frame.grid_remove() # скрыть персонажей
+chapters_frame.frame.grid_remove()  # скрыть главы
+plot_frame.grid_remove() 
 
 refresh_scenes_list()
 
