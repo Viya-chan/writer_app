@@ -6,6 +6,7 @@ ctk.set_default_color_theme("blue")
 
 import data_meneger
 from data_meneger import characters, chapters, plot, parts, save_all, scene_fields, btn_x, selected_chapter_index, selected_character_index, selected_scenes_index
+import characters_tab
 
 #------Проверка на дубликаты 
 def is_duplicate(data_list, key_to_chek, new_value, current_index=None):
@@ -38,81 +39,8 @@ def ask_confirm(message, action_callback):
     ctk.CTkButton(win, text="Да, удалить", command=confirm, fg_color="red").pack(side="left", padx=20)
     ctk.CTkButton(win, text="Отмена", command=cancel).pack(side="right", padx=20)
 #------Персонажи -------
-def refresh_list():
-    for widget in listbox_characters.winfo_children():
-        widget.destroy()
-    for index, ch in enumerate(characters):
-        btn = ctk.CTkButton(listbox_characters, text = ch["name"], command = lambda i = index : on_select_character(i))
-        btn.pack(fill="x", pady=2)
-
-def on_select_character(index):
-        data_meneger.selected_character_index = index
-        ch = characters[index]
-        entry_name.delete(0, tk.END)
-        entry_name.insert(0, ch["name"])
-        entry_appearance.delete(0, tk.END)
-        entry_appearance.insert(0, ch["appearance"])
-        entry_character.delete(0, tk.END)
-        entry_character.insert(0, ch["character"])
-
-def add_character():
-    name = entry_name.get().strip()
-    character = entry_character.get().strip()
-    appearance = entry_appearance.get().strip()
-    if name == "":
-        show_error("Вы не ввели имя!")
-        return
-    if is_duplicate(characters, "name", name):
-        show_error("Такое имя уже есть")
-        return
-    characters.append({
-        "name": name,
-        "character": character,
-        "appearance": appearance,
-    })
-    entry_name.delete(0, tk.END)
-    entry_character.delete(0, tk.END)
-    entry_appearance.delete(0, tk.END)
-    data_meneger.is_dirty = False
-    refresh_list()
-    save_all()
-
-def del_character():
-    if data_meneger.selected_character_index is None:
-        show_error("Вы не выбрали персонажа")
-        return
-    def do_delete():
-        del characters[data_meneger.selected_character_index]
-        selected_character_index = None
-        entry_name.delete(0, tk.END)
-        entry_character.delete(0, tk.END)
-        entry_appearance.delete(0, tk.END)
-
-        refresh_list()
-        save_all()
-    ask_confirm("Вы точно хотите удалить персонажа?", do_delete)
 
 
-def clear_character():
-    data_meneger.selected_character_index = None
-    entry_name.delete(0, tk.END)
-    entry_character.delete(0, tk.END)
-    entry_appearance.delete(0, tk.END)
-
-def save_changes_charakter():
-    name = entry_name.get().strip()
-    if data_meneger.selected_character_index is None:
-        show_error("Вы не выбрали персонажа")
-        return
-    if is_duplicate(characters, "name", name, selected_character_index):
-        show_error("Такое имя уже есть!")
-        return
-    characters[data_meneger.selected_character_index]["name"] = entry_name.get().strip()
-    characters[data_meneger.selected_character_index]["appearance"] = entry_appearance.get().strip()
-    characters[data_meneger.selected_character_index]["character"] = entry_character.get().strip()
-    data_meneger.is_dirty = False
-    refresh_list()
-    save_all()
 #-------- Фунции глав
 def refresh_chapters():
     for widget in listbox_chapters.winfo_children():
@@ -361,16 +289,16 @@ def ask_save_changes(action_callback):
 def show_caracters ():
     chapters_frame.grid_remove()
     plot_frame.grid_remove()
-    characters_frame.grid()
+    #characters_frame.grid()
 
 def show_chapters():
-    characters_frame.grid_remove()
+    #characters_frame.grid_remove()
     plot_frame.grid_remove()
     chapters_frame.grid()
 
 def show_plot():
     chapters_frame.grid_remove()
-    characters_frame.grid_remove()
+    #characters_frame.grid_remove()
     plot_frame.grid()
     
 
@@ -402,63 +330,15 @@ btn3.grid(row = 2, column = 0, pady=1)
 #---------Средняя часть --------
 
 content = ctk.CTkFrame(root, fg_color="transparent")
-content.grid_columnconfigure(0, weight=1)
-content.grid_rowconfigure(0, weight=1)
 content.grid(row = 0, column = 1, sticky = "nsew")
 
 #--------Персонажи----------------
 
-characters_frame = ctk.CTkFrame(content)
-characters_frame.grid(row = 0, column = 0, sticky = "nsew")
-characters_frame.grid_columnconfigure(0, weight=0)
-characters_frame.grid_columnconfigure(1, weight=1)
-characters_frame.grid_rowconfigure(0, weight=1)
-
-#-----------Список персонажей-------
-listbox_characters = ctk.CTkScrollableFrame(characters_frame, width=200)
-listbox_characters.grid(row =0, column=0, rowspan=8, sticky="nsew")
-
-panel = ctk.CTkFrame(characters_frame)
-panel.grid_columnconfigure(0, weight=1)
-panel.grid_rowconfigure(0, weight=0)
-panel.grid_rowconfigure(1, weight=0)     
-panel.grid(row = 0, column = 1, sticky = "nsew")
-
-#--------Средняя часть у персонажей
-
-ctk.CTkLabel(panel, text="Имя").grid(row = 0, column = 0, pady=(10, 0))
-entry_name = ctk.CTkEntry(panel, width=30)
-entry_name.bind("<KeyRelease>", mark_as_dirty)
-entry_name.grid(row = 1, column = 0, sticky = "ew", padx = 10)
-
-ctk.CTkLabel(panel, text="Характер").grid(row = 2, column = 0, pady=(10, 0))
-entry_character = ctk.CTkEntry(panel, width=30)
-entry_character.bind("<KeyRelease>", mark_as_dirty)
-entry_character.grid(row = 3, column = 0, sticky = "ew", padx = 10)
-
-ctk.CTkLabel(panel, text="Внешность").grid(row = 4, column = 0, pady=(10, 0))
-entry_appearance = ctk.CTkEntry(panel, width=30)
-entry_appearance.bind("<KeyRelease>", mark_as_dirty)
-entry_appearance.grid(row = 5, column = 0, sticky = "ew", padx = 10)
-
-characters_buttons = ctk.CTkFrame(panel)
-characters_buttons.grid(row=6, column=0, sticky="ew")
-characters_buttons.grid_columnconfigure(0, weight=0)
-characters_buttons.grid_columnconfigure(1, weight=0)
-
-add_button = ctk.CTkButton(characters_buttons, text = "Добавить", command=add_character)
-add_button.grid(row = 0, column = 0, sticky = "ew", padx = 10, pady = 5)
-
-del_button = ctk.CTkButton(characters_buttons, text= "Удалить", command=del_character)
-del_button.grid(row = 0, column = 1, sticky = "ew", padx = 10, pady = 5)
-
-btn_clear_character = ctk.CTkButton(characters_buttons, text="Очистить", command=lambda:ask_save_changes(clear_character))
-btn_clear_character.grid(row=1, column=0,  sticky = "ew", padx = 10, pady = 5)
-
-btn_save_changes_character = ctk.CTkButton(characters_buttons, text="Сохранить изменения", command=save_changes_charakter)
-btn_save_changes_character.grid(row=1, column=1,  sticky = "ew", padx = 10, pady = 5)
+character_frame = characters_tab.CharactersTab(content)
 #----------Главы----------
 
+content.grid_columnconfigure(0, weight=1)
+content.grid_rowconfigure(0, weight=1)
 
 chapters_frame = ctk.CTkFrame(content)
 chapters_frame.grid(row = 0, column = 0, sticky="nsew")
@@ -614,7 +494,6 @@ btn_clear_scene.grid(row =0, column=1, pady=2)
 scenes_frame.grid_remove()
 plot_frame.grid_remove()
 
-refresh_list()
 refresh_chapters()
 refresh_scenes_list()
 

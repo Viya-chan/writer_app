@@ -2,6 +2,7 @@ import customtkinter as ctk
 import tkinter as tk
 import data_meneger
 
+
 class CharactersTab:
     def __init__(self, parent):
         #Данные
@@ -19,10 +20,10 @@ class CharactersTab:
         self.listbox_frame.grid(row =0, column=0, rowspan=8, sticky="nsew")
 
         self.panel = ctk.CTkFrame(self.frame)
-        self.panel.grid_columnconfigure(0, weight=1)
-        self.panel.grid_rowconfigure(0, weight=0)
-        self.panel.grid_rowconfigure(1, weight=0)     
+        #self.panel.grid_rowconfigure(0, weight=0)
+        #self.panel.grid_rowconfigure(1, weight=0)     
         self.panel.grid(row = 0, column = 1, sticky = "nsew")
+        self.panel.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(self.panel, text="Имя").grid(row = 0, column = 0, pady=(10, 0))
         self.entry_name = ctk.CTkEntry(self.panel, width=30)
@@ -56,6 +57,9 @@ class CharactersTab:
         self.btn_save_changes_character = ctk.CTkButton(self.characters_buttons, text="Сохранить изменения", command=self.save_change)
         self.btn_save_changes_character.grid(row=1, column=1,  sticky = "ew", padx = 10, pady = 5)       
 
+        self.refresh_list()
+
+
     def refresh_list(self):
         for widget in self.listbox_frame.winfo_children():
             widget.destroy()
@@ -69,7 +73,14 @@ class CharactersTab:
             btn.pack(fill="x", pady = 2)
 
     def on_select(self, index):
-        pass
+        self.selected_index = index
+        ch = self.characters[index]
+        self.entry_name.delete(0, tk.END)
+        self.entry_name.insert(0, ch["name"])
+        self.entry_appearance.delete(0, tk.END)
+        self.entry_appearance.insert(0, ch["appearance"])
+        self.entry_character.delete(0, tk.END)
+        self.entry_character.insert(0, ch["character"])
 
     def add_character(self):
         name = self.entry_name.get().strip()
@@ -91,17 +102,35 @@ class CharactersTab:
         
 
     def dell_character(self):
-        pass
+        if self.selected_index is None:
+            print("Вы не выбрали персонажа")
+            return
+        del self.characters[self.selected_index]
+        self.selected_index = None
+        self.entry_name.delete(0, tk.END)
+        self.entry_character.delete(0, tk.END)
+        self.entry_appearance.delete(0, tk.END)
+        
+        self.refresh_list()
+        
+
+
 
     def save_change(self):
-        pass
+        if self.selected_index is None:
+            print("Вы не выбрали персонажа")
+            return
+        self.characters[self.selected_index]["name"] = self.entry_name.get().strip()
+        self.characters[self.selected_index]["appearance"] = self.entry_appearance.get().strip()
+        self.characters[self.selected_index]["character"] = self.entry_character.get().strip()
+        self.refresh_list()
+
+    
 
     def clear_character(self):
-        pass
+        self.selected_index = None
+        self.entry_character.delete(0, tk.END)
+        self.entry_appearance.delete(0, tk.END)
+        self.entry_name.delete(0, tk.END)
 
-root = ctk.CTk()
-root.geometry("500x700")
-tab = CharactersTab(root)
-
-root.mainloop()
 
