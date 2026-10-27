@@ -289,16 +289,16 @@ def ask_save_changes(action_callback):
 def show_caracters ():
     chapters_frame.grid_remove()
     plot_frame.grid_remove()
-    #characters_frame.grid()
+    character_frame.frame.grid()
 
 def show_chapters():
-    #characters_frame.grid_remove()
+    character_frame.frame.grid_remove()
     plot_frame.grid_remove()
     chapters_frame.grid()
 
 def show_plot():
     chapters_frame.grid_remove()
-    #characters_frame.grid_remove()
+    character_frame.frame.grid_remove()
     plot_frame.grid()
     
 
