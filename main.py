@@ -238,12 +238,17 @@ sidebar.grid(row = 0, column = 0, sticky = "ns")
 sidebar.grid_propagate(False)
 
 
+
 btn1 = ctk.CTkButton(sidebar, text="Персонажи", command=show_caracters)
+btn1.grid(row = 0, column = 0, pady=1)
 btn1.grid(row = 0, column = 0, pady=1)
 
 btn2 = ctk.CTkButton(sidebar, text="Главы", command=show_chapters)
 btn2.grid(row = 1, column = 0, pady=1)
+btn2.grid(row = 1, column = 0, pady=1)
 
+btn3 = ctk.CTkButton(sidebar, text="Сюжет", command=show_plot)
+btn3.grid(row = 2, column = 0, pady=1)
 btn3 = ctk.CTkButton(sidebar, text="Сюжет", command=show_plot)
 btn3.grid(row = 2, column = 0, pady=1)
 
