@@ -98,10 +98,7 @@ class CharactersTab:
         self.entry_appearance.delete(0, tk.END)
         self.entry_character.delete(0, tk.END)
         self.refresh_list()
-<<<<<<< HEAD
         data_meneger.save_all()
-=======
->>>>>>> 345339fdf4bbe800f72af37023b544000e6af6e8
 
         
 
@@ -116,10 +113,7 @@ class CharactersTab:
         self.entry_appearance.delete(0, tk.END)
         
         self.refresh_list()
-<<<<<<< HEAD
         data_meneger.save_all()
-=======
->>>>>>> 345339fdf4bbe800f72af37023b544000e6af6e8
         
 
 
@@ -132,10 +126,7 @@ class CharactersTab:
         self.characters[self.selected_index]["appearance"] = self.entry_appearance.get().strip()
         self.characters[self.selected_index]["character"] = self.entry_character.get().strip()
         self.refresh_list()
-<<<<<<< HEAD
         data_meneger.save_all()
-=======
->>>>>>> 345339fdf4bbe800f72af37023b544000e6af6e8
 
     
 
@@ -144,5 +135,3 @@ class CharactersTab:
         self.entry_character.delete(0, tk.END)
         self.entry_appearance.delete(0, tk.END)
         self.entry_name.delete(0, tk.END)
-
-
