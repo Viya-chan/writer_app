@@ -8,6 +8,7 @@ import data_meneger
 from data_meneger import characters, chapters, plot, parts, save_all, scene_fields, btn_x, selected_chapter_index, selected_character_index, selected_scenes_index
 import characters_tab
 import chapters_tab
+import plot_tab
 
 #------Проверка на дубликаты 
 def is_duplicate(data_list, key_to_chek, new_value, current_index=None):
@@ -45,18 +46,6 @@ def ask_confirm(message, action_callback):
 #-------- Фунции глав
 
 #------Функции сюжет--------
-def show_idea():
-    scenes_frame.grid_remove()
-    idea_frame.grid()
-
-def show_scenes():
-    idea_frame.grid_remove()
-    scenes_frame.grid()
-
-def save_idea():
-    plot["idea"] = idea_text.get("1.0", tk.END).strip()
-    data_meneger.is_dirty = False
-    save_all()
 
 def refresh_scenes_list():
     for widget in scenes_list.winfo_children():
@@ -207,18 +196,18 @@ def ask_save_changes(action_callback):
 #------Фунции в боковом меню--------
 def show_caracters ():
     chapters_frame.frame.grid_remove()
-    plot_frame.grid_remove()
+    plot_frame.frame.grid_remove()
     character_frame.frame.grid()
 
 def show_chapters():
     character_frame.frame.grid_remove()
-    plot_frame.grid_remove()
+    plot_frame.frame.grid_remove()
     chapters_frame.frame.grid()
 
 def show_plot():
     chapters_frame.frame.grid_remove()
     character_frame.frame.grid_remove()
-    plot_frame.grid()
+    plot_frame.frame.grid()
     
 
 # ------ Интерфейс ------ 
@@ -252,10 +241,11 @@ btn3.grid(row = 2, column = 0, pady=1)
 content = ctk.CTkFrame(root, fg_color="transparent")
 content.grid(row = 0, column = 1, sticky = "nsew")
 
-#--------Персонажи----------------
+#------Внутренние разделы------
 
 character_frame = characters_tab.CharactersTab(content)
 chapters_frame = chapters_tab.ChaptersTab(content)
+plot_frame = plot_tab.PlotTab(content)
 #----------Главы----------
 
 content.grid_columnconfigure(0, weight=1)
@@ -263,41 +253,8 @@ content.grid_rowconfigure(0, weight=1)
 
 
 #------Cюжет-------
-plot_frame = ctk.CTkFrame(content)
-plot_frame.grid(row = 0, column = 0, sticky="nsew")
-plot_frame.grid_columnconfigure(0, weight=1)
-plot_frame.grid_rowconfigure(0, weight=0)
-plot_frame.grid_rowconfigure(1, weight=1)
-plot_frame.grid_rowconfigure(2, weight=0)
-
-plot_top_panel = ctk.CTkFrame(plot_frame)
-plot_top_panel.grid(row=0, column=0, sticky="ew", pady=2)
-plot_top_panel.grid_columnconfigure(0, weight=0)
-plot_top_panel.grid_columnconfigure(1, weight=0)
-plot_top_panel.grid_rowconfigure(0, weight=0)
-
-btn_idea = ctk.CTkButton(plot_top_panel, text= "Идея", command=show_idea)
-btn_idea.grid(row=0, column=0, padx=1)
-btn_scenes = ctk.CTkButton(plot_top_panel, text= "Сцены", command=show_scenes)
-btn_scenes.grid(row=0, column=1, padx=1)
-
-idea_frame = ctk.CTkFrame(plot_frame)
-idea_frame.grid(row = 1, column=0, sticky="nsew", pady=5)
-idea_frame.grid_columnconfigure(0, weight=1)
-idea_frame.grid_rowconfigure(0, weight=1)
-
-idea_text = ctk.CTkTextbox(idea_frame)
-idea_text.bind("<KeyRelease>", mark_as_dirty)
-idea_text.grid(row=0, column=0, sticky="nsew")
-
-btn_idea_save = ctk.CTkButton(idea_frame, text = "Сохранить идею", command=save_idea)
-btn_idea_save.grid(row=2, column=0)
-
-idea_text.insert("1.0", plot.get("idea", ""))
-
-idea_frame.grid_remove()
 #------Раздел с идеями-----------
-scenes_frame = ctk.CTkFrame(plot_frame)
+scenes_frame = ctk.CTkFrame(plot_frame.frame)
 scenes_frame.grid(row = 1, column=0, sticky="nsew")
 scenes_frame.grid_columnconfigure(0, weight=0)
 scenes_frame.grid_columnconfigure(1, weight=1)
@@ -349,13 +306,13 @@ btn_clear_scene.grid(row =0, column=1, pady=2)
 
 character_frame.frame.grid_remove() # скрыть персонажей
 chapters_frame.frame.grid_remove()  # скрыть главы
-plot_frame.grid_remove() 
+plot_frame.frame.grid_remove() 
 
 refresh_scenes_list()
 
 def really_close():
     save_current_part()
-    plot["idea"] = idea_text.get("1.0", tk.END).strip()
+    #plot["idea"] = idea_text.get("1.0", tk.END).strip()
     save_all()
     root.destroy()
 
